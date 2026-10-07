@@ -8,7 +8,10 @@ import {
   Fish,
   BarChart3,
   Clock,
+  Sparkles,
   ChevronRight,
+  ShieldCheck,
+  CheckCircle2,
   Wind,
   Thermometer,
   Gauge
@@ -55,33 +58,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   const cond = currentForecast.conditions;
+  const bestWindow = [...hourlyScores].sort((a, b) => b.score - a.score)[0] || currentForecast;
 
   return (
     <div className="screen-content home-screen">
-      {/* 1. MOCKUP HERO SCREEN (Exact Match Phone 1) */}
+      {/* 1. MOCKUP HERO HEADER (Phone 1 Style) */}
       <section className="mockup-splash-hero-card">
-        {/* Logo and Brand */}
         <div className="splash-logo-container">
           <div className="splash-fish-logo-icon">
-            <svg viewBox="0 0 100 48" className="brand-svg-fish" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 24C24 9 58 6 84 15C93 19 89 27 80 30C66 36 34 40 12 24Z" fill="url(#cyanBlueGrad)" />
-              <path d="M74 17C81 11 91 9 97 11C94 17 89 21 83 21Z" fill="#00d2ff" />
-              <path d="M77 27C84 33 91 35 97 33C93 29 87 25 81 25Z" fill="#0077b6" />
-              <circle cx="28" cy="21" r="3.2" fill="#ffffff" />
+            <svg viewBox="0 0 100 50" className="brand-svg-fish" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 25C25 8 60 5 85 15C95 20 90 28 80 32C65 38 35 42 10 25Z" fill="url(#fishGrad)" />
+              <path d="M75 18C82 12 92 10 98 12C95 18 90 22 84 22Z" fill="#00e5ff" />
+              <path d="M78 28C85 34 92 36 98 34C94 30 88 26 82 26Z" fill="#0077b6" />
+              <circle cx="28" cy="22" r="3" fill="#ffffff" />
               <defs>
-                <linearGradient id="cyanBlueGrad" x1="12" y1="24" x2="84" y2="24" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#00d2ff" />
+                <linearGradient id="fishGrad" x1="10" y1="25" x2="85" y2="25" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#00e5ff" />
                   <stop offset="1" stopColor="#0077b6" />
                 </linearGradient>
               </defs>
             </svg>
           </div>
-          <h1 className="mockup-brand-title">FISH<span className="brand-iq-cyan">IQ</span></h1>
+          <h1 className="mockup-brand-title">FISHIQ</h1>
           <div className="mockup-brand-sub">SMART FISHING LATAM</div>
           <p className="mockup-brand-slogan">Mejores decisiones. Más capturas.</p>
         </div>
 
-        {/* Feature Icons Strip */}
+        {/* Feature Icons Strip from Reference Mockup */}
         <div className="feature-icons-strip">
           <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
             <div className="feature-icon-circle"><Cloud size={16} /></div>
@@ -109,40 +112,37 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        {/* Leaping Snook Hero Graphic (High Resolution from Mockup) */}
+        {/* Hero Leaping Fish Graphic */}
         <div className="splash-fish-artwork">
           <img
-            src="/images/splash_fish.jpg"
-            alt="Robalo saltando en el mar"
+            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
+            alt="Robalo jumping out of water"
             className="splash-hero-img"
           />
           <div className="splash-img-overlay-glow"></div>
         </div>
 
-        {/* Buttons Exactly Matching Phone 1 Mockup */}
+        {/* Action Buttons from Mockup */}
         <div className="splash-cta-buttons">
           <button className="mockup-btn-primary" onClick={() => onNavigateToTab('forecast')}>
             Comenzar
           </button>
           <button className="mockup-btn-secondary" onClick={() => onNavigateToTab('map')}>
-            Iniciar sesión
-          </button>
-          <button className="mockup-btn-link" onClick={() => onNavigateToTab('map')}>
-            Explorar sin cuenta
+            Explorar Mapa Inteligente
           </button>
         </div>
       </section>
 
-      {/* 2. LIVE DASHBOARD QUICK SUMMARY IN PANAMA */}
+      {/* 2. LIVE DASHBOARD QUICK SUMMARY */}
       <section className="live-snapshot-card">
         <div className="section-header-compact">
           <span className="section-title-tag">CONDICIONES EN {currentZone.name.toUpperCase()}</span>
-          <span className="score-badge-green">Fishing Score: {currentForecast.score}/100</span>
+          <span className="score-badge-green">Score {currentForecast.score}/100</span>
         </div>
 
         <div className="conditions-grid-2x3">
           <div className="cond-mini-tile">
-            <Clock size={16} className="text-cyan-bright" />
+            <Clock size={16} className="text-cyan" />
             <div className="tile-texts">
               <span className="tile-lbl">Mejor horario</span>
               <span className="tile-val">6:10 – 8:40 a.m.</span>
@@ -150,7 +150,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           <div className="cond-mini-tile">
-            <Waves size={16} className="text-cyan-bright" />
+            <Waves size={16} className="text-cyan" />
             <div className="tile-texts">
               <span className="tile-lbl">Marea ({cond.tidePhase})</span>
               <span className="tile-val">↑ {cond.tideHeightM} m</span>
@@ -158,7 +158,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           <div className="cond-mini-tile">
-            <Wind size={16} className="text-cyan-bright" />
+            <Wind size={16} className="text-cyan" />
             <div className="tile-texts">
               <span className="tile-lbl">Viento</span>
               <span className="tile-val">{cond.windSpeedKnots} kt {cond.windDirectionLabel}</span>
@@ -166,7 +166,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           <div className="cond-mini-tile">
-            <Moon size={16} className="text-cyan-bright" />
+            <Moon size={16} className="text-cyan" />
             <div className="tile-texts">
               <span className="tile-lbl">Luna</span>
               <span className="tile-val">{cond.moonIllumination}% {cond.moonPhase}</span>
@@ -174,7 +174,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           <div className="cond-mini-tile">
-            <Thermometer size={16} className="text-cyan-bright" />
+            <Thermometer size={16} className="text-cyan" />
             <div className="tile-texts">
               <span className="tile-lbl">Temperatura</span>
               <span className="tile-val">{cond.sstCelsius}°C</span>
@@ -182,7 +182,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           <div className="cond-mini-tile">
-            <Gauge size={16} className="text-cyan-bright" />
+            <Gauge size={16} className="text-cyan" />
             <div className="tile-texts">
               <span className="tile-lbl">Presión</span>
               <span className="tile-val">{cond.pressureHpa} hPa</span>
@@ -191,11 +191,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </section>
 
-      {/* 3. SPECIES SELECTOR */}
+      {/* 3. SPECIES SELECTOR ROW */}
       <section className="species-picker-section">
         <div className="section-header-compact">
-          <span className="section-title-tag">ESPECIE ACTIVA</span>
-          <span className="station-provider-tag">Piloto Panamá</span>
+          <span className="section-title-tag">SELECCIONAR ESPECIE</span>
+          <span className="station-provider-tag">8 especies de Panamá</span>
         </div>
 
         <div className="species-scroll-row">
@@ -218,9 +218,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* 4. RECENT CATCHES PREVIEW */}
       <section className="recent-activity-section">
         <div className="section-header-compact">
-          <span className="section-title-tag">DIARIO DE PESCA RECIENTE</span>
+          <span className="section-title-tag">ÚLTIMAS CAPTURAS DE LA COMUNIDAD</span>
           <button className="text-link-btn" onClick={() => onNavigateToTab('logbook')}>
-            Ver todo ({recentCatches.length}) <ChevronRight size={14} />
+            Ver diario ({recentCatches.length}) <ChevronRight size={14} />
           </button>
         </div>
 

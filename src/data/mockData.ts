@@ -407,7 +407,7 @@ export const INITIAL_CATCHES: CatchRecord[] = [
     lon: -78.885,
     isPrivate: true,
     notes: 'Gran ataque en marea creciente.',
-    photoUrl: '/images/angler_robalo.jpg',
+    photoUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
     environmentalSnapshot: {
       sstCelsius: 28.5,
       tidePhase: 'Subiendo',
@@ -434,7 +434,7 @@ export const INITIAL_CATCHES: CatchRecord[] = [
     lon: -79.54,
     isPrivate: true,
     notes: 'Cardumen activo en superficie temprano por la mañana.',
-    photoUrl: '/images/jurel_catches.jpg',
+    photoUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
     environmentalSnapshot: {
       sstCelsius: 27.6,
       tidePhase: 'Subiendo',

@@ -1,183 +1,113 @@
 import React, { useState } from 'react';
 import { CatchRecord, Species } from '../../types';
-import { BookOpen, MapPin, Lock, Filter, Plus, Calendar, Award, Scale, Waves, Thermometer, Anchor, Trash2 } from 'lucide-react';
+import { Plus, ChevronRight, BarChart3, MapPin, Scale, Ruler, Compass } from 'lucide-react';
 
 interface LogbookScreenProps {
   catches: CatchRecord[];
   allSpecies: Species[];
   onOpenLogModal: () => void;
-  onDeleteCatch?: (id: string) => void;
 }
 
 export const LogbookScreen: React.FC<LogbookScreenProps> = ({
   catches,
   allSpecies,
   onOpenLogModal,
-  onDeleteCatch,
 }) => {
-  const [selectedFilterSpecies, setSelectedFilterSpecies] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-
-  const filteredCatches = catches.filter((c) => {
-    if (selectedFilterSpecies === 'all') return true;
-    return c.speciesId === selectedFilterSpecies;
-  });
-
-  // Calculate statistics
-  const totalCatches = catches.length;
-  const biggestCatch = [...catches].sort((a, b) => b.weightLb - a.weightLb)[0];
+  const [activeTab, setActiveTab] = useState<'capturas' | 'estadisticas'>('capturas');
 
   return (
-    <div className="screen-content logbook-screen">
-      {/* Header & Stats Banner */}
-      <div className="logbook-header-banner">
-        <div className="logbook-banner-top">
-          <div>
-            <h2>Diario de Capturas</h2>
-            <p className="logbook-sub">Tu bitácora privada de pesca en el Pacífico de Panamá</p>
-          </div>
-          <button className="add-catch-btn-pill" onClick={onOpenLogModal}>
-            <Plus size={16} /> Nueva Captura
-          </button>
-        </div>
-
-        {/* Quick Stats Grid */}
-        <div className="logbook-stats-grid">
-          <div className="stat-box">
-            <span className="stat-box-num">{totalCatches}</span>
-            <span className="stat-box-lbl">Capturas Totales</span>
-          </div>
-          <div className="stat-box highlight">
-            <span className="stat-box-num">{biggestCatch ? `${biggestCatch.weightLb} lb` : '—'}</span>
-            <span className="stat-box-lbl">Récord Personal</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-box-num">100%</span>
-            <span className="stat-box-lbl">Privacidad Activa</span>
-          </div>
-        </div>
+    <div className="screen-content mockup-logbook-screen">
+      {/* 1. MOCKUP TOP HEADER (Phone 5 Style) */}
+      <div className="logbook-mockup-header">
+        <h2 className="logbook-page-title">Diario de capturas</h2>
+        <button className="add-catch-circle-blue-btn" onClick={onOpenLogModal} title="Registrar Captura">
+          <Plus size={20} />
+        </button>
       </div>
 
-      {/* Filter and Mode Bar */}
-      <div className="logbook-controls-bar">
-        <div className="species-filter-group">
-          <Filter size={15} />
-          <select
-            value={selectedFilterSpecies}
-            onChange={(e) => setSelectedFilterSpecies(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">Todas las especies ({catches.length})</option>
-            {allSpecies.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.avatarEmoji} {s.commonName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="view-mode-tabs">
-          <button
-            className={`mode-btn ${viewMode === 'list' ? 'active' : ''}`}
-            onClick={() => setViewMode('list')}
-          >
-            Lista
-          </button>
-          <button
-            className={`mode-btn ${viewMode === 'map' ? 'active' : ''}`}
-            onClick={() => setViewMode('map')}
-          >
-            <MapPin size={14} /> Mapa Privado
-          </button>
-        </div>
+      {/* 2. TAB PILLS (Mis capturas / Estadísticas) */}
+      <div className="logbook-mockup-tabs">
+        <button
+          className={`log-tab-btn ${activeTab === 'capturas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('capturas')}
+        >
+          Mis capturas
+        </button>
+        <button
+          className={`log-tab-btn ${activeTab === 'estadisticas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('estadisticas')}
+        >
+          Estadísticas
+        </button>
       </div>
 
-      {/* Mode 1: List View */}
-      {viewMode === 'list' && (
-        <div className="catches-list-container">
-          {filteredCatches.length === 0 ? (
-            <div className="empty-logbook-card">
-              <BookOpen size={40} className="empty-icon" />
-              <h3>No hay capturas registradas</h3>
-              <p>Aún no has registrado piezas de esta especie o tu diario está vacío.</p>
-              <button className="primary-cta-btn" onClick={onOpenLogModal}>
-                Registrar Mi Primera Captura
-              </button>
+      {/* 3. CAPTURAS LIST (Matching Phone 5 Cards) */}
+      {activeTab === 'capturas' ? (
+        <div className="mockup-catches-list">
+          {catches.map((c) => (
+            <div key={c.id} className="mockup-catch-card">
+              {/* Card Header Row with Map Thumbnail & Meta */}
+              <div className="catch-card-top-row">
+                <div className="catch-meta-left">
+                  <div className="catch-map-mini-thumb">
+                    <MapPin size={14} className="text-cyan" />
+                  </div>
+                  <div className="catch-title-group">
+                    <span className="catch-sp-heading">{c.speciesName}</span>
+                    <span className="catch-time-place">
+                      {new Date(c.caughtAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}{' '}
+                      {new Date(c.caughtAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}{' '}
+                      {c.zoneName}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-muted" />
+              </div>
+
+              {/* Big Catch Photo */}
+              <div className="catch-big-photo-wrap">
+                <img src={c.photoUrl} alt={c.speciesName} className="catch-big-photo" />
+              </div>
+
+              {/* 3-Column Stats Row (Peso / Longitud / Señuelo) */}
+              <div className="catch-stats-3col-bar">
+                <div className="stat-col">
+                  <span className="stat-lbl">Peso</span>
+                  <span className="stat-val">{c.weightLb} lb</span>
+                </div>
+                <div className="stat-col">
+                  <span className="stat-lbl">Longitud</span>
+                  <span className="stat-val">{c.lengthCm} cm</span>
+                </div>
+                <div className="stat-col">
+                  <span className="stat-lbl">Señuelo</span>
+                  <span className="stat-val">{c.lureUsed}</span>
+                </div>
+              </div>
+
+              {/* Angler Note */}
+              {c.notes && (
+                <div className="catch-note-footer">
+                  <p>{c.notes}</p>
+                </div>
+              )}
             </div>
-          ) : (
-            filteredCatches.map((c) => (
-              <div key={c.id} className="catch-card-item">
-                <div className="catch-card-media">
-                  {c.photoUrl ? (
-                    <img src={c.photoUrl} alt={c.speciesName} className="catch-card-img" />
-                  ) : (
-                    <div className="catch-img-placeholder">🐟</div>
-                  )}
-                  <span className="catch-weight-pill">
-                    <Scale size={13} /> {c.weightLb} lb • {c.lengthCm} cm
-                  </span>
-                  {c.isPrivate && (
-                    <span className="catch-private-tag" title="Spot privado no compartido">
-                      <Lock size={12} /> Privado
-                    </span>
-                  )}
-                </div>
-
-                <div className="catch-card-body">
-                  <div className="catch-body-header">
-                    <h3 className="catch-sp-name">{c.speciesName}</h3>
-                    <span className="catch-date">
-                      <Calendar size={13} /> {new Date(c.caughtAt).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <div className="catch-zone-lure">
-                    <span className="catch-zone-tag"><MapPin size={12} /> {c.zoneName}</span>
-                    <span className="catch-lure-tag">🎣 {c.lureUsed}</span>
-                  </div>
-
-                  {c.notes && <p className="catch-notes-snippet">"{c.notes}"</p>}
-
-                  {/* Immutable Environmental Snapshot Box */}
-                  <div className="catch-snapshot-box">
-                    <div className="snapshot-box-title">Snapshot Ambiental del Momento:</div>
-                    <div className="snapshot-box-items">
-                      <span><Thermometer size={12} /> {c.environmentalSnapshot.sstCelsius}°C SST</span>
-                      <span><Anchor size={12} /> Marea {c.environmentalSnapshot.tidePhase} ({c.environmentalSnapshot.tideHeightM}m)</span>
-                      <span><Waves size={12} /> Oleaje {c.environmentalSnapshot.waveHeightM}m</span>
-                      <span className="score-snapshot-tag">Score: {c.environmentalSnapshot.scoreCalculated}/100</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+          ))}
         </div>
-      )}
-
-      {/* Mode 2: Private Map View */}
-      {viewMode === 'map' && (
-        <div className="private-map-view-card">
-          <div className="private-map-notice">
-            <Lock size={16} />
-            <span>
-              <strong>Mapa Privado de Coordenadas:</strong> Solo tú tienes acceso a estos puntos. No se transmiten públicamente a otros pescadores.
-            </span>
+      ) : (
+        /* Estadísticas Tab */
+        <div className="stats-tab-content">
+          <div className="stat-metric-card">
+            <span className="stat-title">Total de Capturas</span>
+            <span className="stat-number">{catches.length} piezas</span>
           </div>
-
-          <div className="private-spots-list-preview">
-            {catches.map((c) => (
-              <div key={c.id} className="private-spot-summary-row">
-                <div className="spot-dot"></div>
-                <div className="spot-details">
-                  <span className="spot-sp">{c.speciesName} ({c.weightLb} lb)</span>
-                  <span className="spot-coords">
-                    Lat: {c.lat.toFixed(4)}, Lon: {c.lon.toFixed(4)} — {c.zoneName}
-                  </span>
-                </div>
-                <span className="spot-score-pill">Score {c.environmentalSnapshot.scoreCalculated}</span>
-              </div>
-            ))}
+          <div className="stat-metric-card">
+            <span className="stat-title">Especie Más Frecuente</span>
+            <span className="stat-number">Robalo (50%)</span>
+          </div>
+          <div className="stat-metric-card">
+            <span className="stat-title">Mayor Peso Registrado</span>
+            <span className="stat-number">48.5 lb (Atún)</span>
           </div>
         </div>
       )}

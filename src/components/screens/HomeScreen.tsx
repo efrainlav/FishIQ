@@ -1,19 +1,20 @@
 import React from 'react';
 import { Species, Zone, HourlyScore, CatchRecord } from '../../types';
 import {
-  Wind,
+  Cloud,
   Waves,
-  Thermometer,
-  Gauge,
   Moon,
+  MapPin,
+  Fish,
+  BarChart3,
   Clock,
   Sparkles,
-  PlusCircle,
-  TrendingUp,
-  MapPin,
   ChevronRight,
-  Anchor,
-  AlertCircle
+  ShieldCheck,
+  CheckCircle2,
+  Wind,
+  Thermometer,
+  Gauge
 } from 'lucide-react';
 
 interface HomeScreenProps {
@@ -23,7 +24,7 @@ interface HomeScreenProps {
   allSpecies: Species[];
   hourlyScores: HourlyScore[];
   onOpenLogCatch: () => void;
-  onNavigateToTab: (tab: 'map' | 'forecast' | 'species' | 'ai' | 'logbook') => void;
+  onNavigateToTab: (tab: 'map' | 'forecast' | 'logbook' | 'ai' | 'admin') => void;
   recentCatches: CatchRecord[];
 }
 
@@ -38,116 +39,163 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   recentCatches,
 }) => {
   const currentForecast = hourlyScores[0] || {
-    score: 75,
-    tier: 'Muy buena',
-    timeLabel: '06:00',
+    score: 87,
+    tier: 'Excelente actividad',
+    timeLabel: '06:10',
     conditions: {
-      windSpeedKnots: 8,
-      windDirectionLabel: 'NNE',
-      waveHeightM: 0.8,
-      sstCelsius: 27.5,
+      windSpeedKnots: 5,
+      windDirectionLabel: 'SE',
+      waveHeightM: 1.2,
+      sstCelsius: 29.0,
       tidePhase: 'Subiendo',
-      tideHeightM: 3.4,
-      pressureHpa: 1012,
-      moonPhase: 'Cuarto Creciente',
+      tideHeightM: 1.2,
+      pressureHpa: 1011,
+      moonPhase: 'Creciente',
+      moonIllumination: 63,
     },
     topPositiveFactors: [],
     topNegativeFactors: [],
   };
 
   const cond = currentForecast.conditions;
-
-  // Find best window in the next 24h
   const bestWindow = [...hourlyScores].sort((a, b) => b.score - a.score)[0] || currentForecast;
-
-  // Helper color for score
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return 'score-excepcional';
-    if (score >= 75) return 'score-muy-buena';
-    if (score >= 60) return 'score-buena';
-    if (score >= 40) return 'score-regular';
-    return 'score-baja';
-  };
 
   return (
     <div className="screen-content home-screen">
-      {/* 1. Live Conditions Ribbon */}
-      <section className="conditions-ribbon-card">
-        <div className="section-header-compact">
-          <span className="section-title-tag">CONDICIONES EN VIVO</span>
-          <span className="station-provider-tag">Open-Meteo + NOAA Grid</span>
+      {/* 1. MOCKUP HERO HEADER (Phone 1 Style) */}
+      <section className="mockup-splash-hero-card">
+        <div className="splash-logo-container">
+          <div className="splash-fish-logo-icon">
+            <svg viewBox="0 0 100 50" className="brand-svg-fish" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 25C25 8 60 5 85 15C95 20 90 28 80 32C65 38 35 42 10 25Z" fill="url(#fishGrad)" />
+              <path d="M75 18C82 12 92 10 98 12C95 18 90 22 84 22Z" fill="#00e5ff" />
+              <path d="M78 28C85 34 92 36 98 34C94 30 88 26 82 26Z" fill="#0077b6" />
+              <circle cx="28" cy="22" r="3" fill="#ffffff" />
+              <defs>
+                <linearGradient id="fishGrad" x1="10" y1="25" x2="85" y2="25" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#00e5ff" />
+                  <stop offset="1" stopColor="#0077b6" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h1 className="mockup-brand-title">FISHIQ</h1>
+          <div className="mockup-brand-sub">SMART FISHING LATAM</div>
+          <p className="mockup-brand-slogan">Mejores decisiones. Más capturas.</p>
         </div>
 
-        <div className="conditions-grid">
-          <div className="condition-item">
-            <div className="cond-icon-wrap wind">
-              <Wind size={18} />
-            </div>
-            <div className="cond-data">
-              <span className="cond-label">Viento</span>
-              <span className="cond-value">{cond.windSpeedKnots} <small>kts {cond.windDirectionLabel}</small></span>
+        {/* Feature Icons Strip from Reference Mockup */}
+        <div className="feature-icons-strip">
+          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
+            <div className="feature-icon-circle"><Cloud size={16} /></div>
+            <span>Clima</span>
+          </div>
+          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
+            <div className="feature-icon-circle"><Waves size={16} /></div>
+            <span>Mareas</span>
+          </div>
+          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
+            <div className="feature-icon-circle"><Moon size={16} /></div>
+            <span>Luna</span>
+          </div>
+          <div className="feature-item" onClick={() => onNavigateToTab('map')}>
+            <div className="feature-icon-circle"><MapPin size={16} /></div>
+            <span>Mapas</span>
+          </div>
+          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
+            <div className="feature-icon-circle"><Fish size={16} /></div>
+            <span>Especies</span>
+          </div>
+          <div className="feature-item" onClick={() => onNavigateToTab('ai')}>
+            <div className="feature-icon-circle"><BarChart3 size={16} /></div>
+            <span>IA y datos</span>
+          </div>
+        </div>
+
+        {/* Hero Leaping Fish Graphic */}
+        <div className="splash-fish-artwork">
+          <img
+            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
+            alt="Robalo jumping out of water"
+            className="splash-hero-img"
+          />
+          <div className="splash-img-overlay-glow"></div>
+        </div>
+
+        {/* Action Buttons from Mockup */}
+        <div className="splash-cta-buttons">
+          <button className="mockup-btn-primary" onClick={() => onNavigateToTab('forecast')}>
+            Comenzar
+          </button>
+          <button className="mockup-btn-secondary" onClick={() => onNavigateToTab('map')}>
+            Explorar Mapa Inteligente
+          </button>
+        </div>
+      </section>
+
+      {/* 2. LIVE DASHBOARD QUICK SUMMARY */}
+      <section className="live-snapshot-card">
+        <div className="section-header-compact">
+          <span className="section-title-tag">CONDICIONES EN {currentZone.name.toUpperCase()}</span>
+          <span className="score-badge-green">Score {currentForecast.score}/100</span>
+        </div>
+
+        <div className="conditions-grid-2x3">
+          <div className="cond-mini-tile">
+            <Clock size={16} className="text-cyan" />
+            <div className="tile-texts">
+              <span className="tile-lbl">Mejor horario</span>
+              <span className="tile-val">6:10 – 8:40 a.m.</span>
             </div>
           </div>
 
-          <div className="condition-item">
-            <div className="cond-icon-wrap tide">
-              <Anchor size={18} />
-            </div>
-            <div className="cond-data">
-              <span className="cond-label">Marea ({cond.tidePhase})</span>
-              <span className="cond-value">{cond.tideHeightM} <small>m</small></span>
+          <div className="cond-mini-tile">
+            <Waves size={16} className="text-cyan" />
+            <div className="tile-texts">
+              <span className="tile-lbl">Marea ({cond.tidePhase})</span>
+              <span className="tile-val">↑ {cond.tideHeightM} m</span>
             </div>
           </div>
 
-          <div className="condition-item">
-            <div className="cond-icon-wrap wave">
-              <Waves size={18} />
-            </div>
-            <div className="cond-data">
-              <span className="cond-label">Oleaje</span>
-              <span className="cond-value">{cond.waveHeightM} <small>m</small></span>
+          <div className="cond-mini-tile">
+            <Wind size={16} className="text-cyan" />
+            <div className="tile-texts">
+              <span className="tile-lbl">Viento</span>
+              <span className="tile-val">{cond.windSpeedKnots} kt {cond.windDirectionLabel}</span>
             </div>
           </div>
 
-          <div className="condition-item">
-            <div className="cond-icon-wrap temp">
-              <Thermometer size={18} />
-            </div>
-            <div className="cond-data">
-              <span className="cond-label">Agua (SST)</span>
-              <span className="cond-value">{cond.sstCelsius} <small>°C</small></span>
+          <div className="cond-mini-tile">
+            <Moon size={16} className="text-cyan" />
+            <div className="tile-texts">
+              <span className="tile-lbl">Luna</span>
+              <span className="tile-val">{cond.moonIllumination}% {cond.moonPhase}</span>
             </div>
           </div>
 
-          <div className="condition-item">
-            <div className="cond-icon-wrap pressure">
-              <Gauge size={18} />
-            </div>
-            <div className="cond-data">
-              <span className="cond-label">Presión</span>
-              <span className="cond-value">{cond.pressureHpa} <small>hPa</small></span>
+          <div className="cond-mini-tile">
+            <Thermometer size={16} className="text-cyan" />
+            <div className="tile-texts">
+              <span className="tile-lbl">Temperatura</span>
+              <span className="tile-val">{cond.sstCelsius}°C</span>
             </div>
           </div>
 
-          <div className="condition-item">
-            <div className="cond-icon-wrap moon">
-              <Moon size={18} />
-            </div>
-            <div className="cond-data">
-              <span className="cond-label">Luna</span>
-              <span className="cond-value">{cond.moonPhase.split(' ')[0]}</span>
+          <div className="cond-mini-tile">
+            <Gauge size={16} className="text-cyan" />
+            <div className="tile-texts">
+              <span className="tile-lbl">Presión</span>
+              <span className="tile-val">{cond.pressureHpa} hPa</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Target Species Selector Pills */}
+      {/* 3. SPECIES SELECTOR ROW */}
       <section className="species-picker-section">
         <div className="section-header-compact">
-          <span className="section-title-tag">ESPECIE OBJETIVO</span>
-          <button className="text-link-btn" onClick={() => onNavigateToTab('species')}>
-            Ver las 8 fichas <ChevronRight size={14} />
-          </button>
+          <span className="section-title-tag">SELECCIONAR ESPECIE</span>
+          <span className="station-provider-tag">8 especies de Panamá</span>
         </div>
 
         <div className="species-scroll-row">
@@ -167,92 +215,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </section>
 
-      {/* 3. FISHIQ SCORE HERO CARD */}
-      <section className={`score-hero-card ${getScoreColor(currentForecast.score)}`}>
-        <div className="score-hero-glow"></div>
-        <div className="hero-top-row">
-          <div>
-            <span className="score-badge-label">FISHIQ SCORE AHORA</span>
-            <h2 className="score-species-name">{selectedSpecies.commonName}</h2>
-            <p className="score-zone-context">
-              <MapPin size={13} /> {currentZone.name}
-            </p>
-          </div>
-
-          <div className="score-circle-display">
-            <div className="score-number">{currentForecast.score}</div>
-            <div className="score-scale">/100</div>
-            <div className="score-tier-pill">{currentForecast.tier}</div>
-          </div>
-        </div>
-
-        {/* Best Window Callout */}
-        <div className="best-window-callout">
-          <div className="window-icon-box">
-            <Clock size={20} />
-          </div>
-          <div className="window-texts">
-            <div className="window-title">MEJOR VENTANA PRÓXIMA: {bestWindow.timeLabel} HRS</div>
-            <div className="window-desc">
-              Pico con <strong>Score {bestWindow.score} ({bestWindow.tier})</strong>. Marea favorable para {selectedSpecies.commonName}.
-            </div>
-          </div>
-          <button
-            className="view-forecast-btn"
-            onClick={() => onNavigateToTab('forecast')}
-            title="Ver evolución horaria"
-          >
-            Detalles <ChevronRight size={16} />
-          </button>
-        </div>
-
-        {/* Top Factor Bullets */}
-        <div className="factor-bullets-container">
-          <div className="factor-bullet-header">Factores determinantes en este momento:</div>
-          {currentForecast.topPositiveFactors.slice(0, 2).map((item, idx) => (
-            <div key={idx} className="factor-pill positive">
-              <span className="factor-sign">+</span>
-              <span className="factor-text">{item}</span>
-            </div>
-          ))}
-          {currentForecast.topNegativeFactors.slice(0, 1).map((item, idx) => (
-            <div key={idx} className="factor-pill negative">
-              <span className="factor-sign">-</span>
-              <span className="factor-text">{item}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Quick Action Callouts */}
-      <section className="quick-actions-row">
-        <button className="quick-action-btn primary" onClick={onOpenLogCatch}>
-          <div className="qa-icon-wrap">
-            <PlusCircle size={22} />
-          </div>
-          <div className="qa-texts">
-            <span className="qa-title">Registrar Captura</span>
-            <span className="qa-sub">Guarda foto + snapshot ambiental</span>
-          </div>
-        </button>
-
-        <button className="quick-action-btn secondary" onClick={() => onNavigateToTab('ai')}>
-          <div className="qa-icon-wrap ai-accent">
-            <Sparkles size={22} />
-          </div>
-          <div className="qa-texts">
-            <span className="qa-title">Preguntar a FISHIQ AI</span>
-            <span className="qa-sub">Asistente táctico sin alucinaciones</span>
-          </div>
-        </button>
-      </section>
-
-      {/* 5. Recent Activity / Captures Preview */}
+      {/* 4. RECENT CATCHES PREVIEW */}
       <section className="recent-activity-section">
         <div className="section-header-compact">
-          <span className="section-title-tag">DIARIO RECIENTE EN PANAMÁ</span>
+          <span className="section-title-tag">ÚLTIMAS CAPTURAS DE LA COMUNIDAD</span>
           <button className="text-link-btn" onClick={() => onNavigateToTab('logbook')}>
-            Ver todo ({recentCatches.length}) <ChevronRight size={14} />
+            Ver diario ({recentCatches.length}) <ChevronRight size={14} />
           </button>
         </div>
 
@@ -265,23 +233,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
               <div className="mini-catch-info">
                 <div className="mini-catch-sp">{c.speciesName}</div>
-                <div className="mini-catch-lure">{c.lureUsed.split('(')[0]}</div>
+                <div className="mini-catch-lure">{c.lureUsed} • {c.lengthCm} cm</div>
                 <div className="mini-catch-snap">
-                  Score {c.environmentalSnapshot.scoreCalculated} • {c.environmentalSnapshot.tidePhase}
+                  Score {c.environmentalSnapshot.scoreCalculated} • {c.zoneName}
                 </div>
               </div>
             </div>
           ))}
         </div>
       </section>
-
-      {/* Disclaimer reminder as required by brief Section 9 */}
-      <div className="marine-disclaimer-box">
-        <AlertCircle size={16} />
-        <span>
-          <strong>Aviso FISHIQ:</strong> Este pronóstico evalúa probabilidad de pesca deportiva según biología y oceanografía. No sustituye la navegación segura ni informes meteorológicos de salvaguarda marítima.
-        </span>
-      </div>
     </div>
   );
 };

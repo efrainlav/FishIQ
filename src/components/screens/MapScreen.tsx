@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Zone, Spot, Species } from '../../types';
 import L from 'leaflet';
-import { Layers, MapPin, Plus, Lock, Eye, Waves, Sparkles, Navigation } from 'lucide-react';
+import { Search, ChevronDown, Navigation, Layers, Heart, Plus, Minus, Lock, Sparkles, MapPin } from 'lucide-react';
 
 interface MapScreenProps {
   currentZone: Zone;
@@ -12,6 +12,7 @@ interface MapScreenProps {
   selectedSpecies: Species;
   allSpecies: Species[];
   onSelectSpecies: (species: Species) => void;
+  onNavigateToForecast: () => void;
 }
 
 export const MapScreen: React.FC<MapScreenProps> = ({
@@ -23,24 +24,23 @@ export const MapScreen: React.FC<MapScreenProps> = ({
   selectedSpecies,
   allSpecies,
   onSelectSpecies,
+  onNavigateToForecast,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
-  const [showBathymetry, setShowBathymetry] = useState(true);
-  const [showHotspots, setShowHotspots] = useState(true);
-  const [showPrivateSpots, setShowPrivateSpots] = useState(true);
+  const [activeLayer, setActiveLayer] = useState<'map' | 'satellite' | 'bathymetry'>('satellite');
+  const [searchQuery, setSearchQuery] = useState('');
   const [isAddingSpot, setIsAddingSpot] = useState(false);
   const [newSpotName, setNewSpotName] = useState('');
-  const [newSpotDepth, setNewSpotDepth] = useState('35');
 
-  // Simulated Hotspots in Panama for current species
+  // Hotspots for current species matching the mockups
   const hotspots = [
-    { id: 'h1', name: 'Drop-off Contadora (Perlas)', lat: 8.61, lon: -79.02, score: 89, depth: 55, species: 'atun' },
-    { id: 'h2', name: 'Canal de Taboga Este', lat: 8.795, lon: -79.54, score: 84, depth: 22, species: 'jurel' },
-    { id: 'h3', name: 'Canto Los Frailes Sur', lat: 7.33, lon: -80.01, score: 92, depth: 95, species: 'dorado' },
-    { id: 'h4', name: 'Boca Río Pacora', lat: 8.99, lon: -79.28, score: 86, depth: 6, species: 'robalo' },
-    { id: 'h5', name: 'Banco Hannibal Central', lat: 7.38, lon: -81.79, score: 95, depth: 140, species: 'atun' },
+    { id: 'h1', name: 'Lago Bayano (Sector Este)', lat: 9.172, lon: -78.885, score: 87, depth: 14, species: 'robalo', zone: 'bayano' },
+    { id: 'h2', name: 'Bahía de Panamá (Canal)', lat: 8.805, lon: -79.54, score: 88, depth: 25, species: 'robalo', zone: 'panama-bay' },
+    { id: 'h3', name: 'Manglares de Chepo', lat: 8.98, lon: -79.15, score: 79, depth: 8, species: 'robalo', zone: 'panama-bay' },
+    { id: 'h4', name: 'Bajo San José (Perlas)', lat: 8.275, lon: -79.11, score: 89, depth: 62, species: 'atun', zone: 'las-perlas' },
+    { id: 'h5', name: 'Los Frailes (Pedasí)', lat: 7.345, lon: -79.998, score: 92, depth: 85, species: 'dorado', zone: 'pedasi-azuero' },
   ];
 
   // Initialize and update map
@@ -48,256 +48,230 @@ export const MapScreen: React.FC<MapScreenProps> = ({
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      // Create map
       const map = L.map(mapContainerRef.current, {
         center: [currentZone.lat, currentZone.lon],
         zoom: currentZone.zoom,
         zoomControl: false,
       });
 
-      // Esri Ocean Basemap (crisp, professional nautical and bathymetric styling)
-      L.tileLayer(
+      // Satellite Imagery Tile Layer (Esri World Imagery)
+      const satLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { attribution: 'Esri Satellite' }
+      );
+
+      // Ocean Base Tile Layer
+      const oceanLayer = L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
-        {
-          attribution: 'Tiles &copy; Esri, GEBCO, NOAA, National Geographic',
-          maxZoom: 14,
-        }
-      ).addTo(map);
+        { attribution: 'Esri Ocean, GEBCO' }
+      );
 
-      // Add ocean reference labels
-      L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}',
-        {
-          maxZoom: 14,
-        }
-      ).addTo(map);
+      // Street/Standard Map Layer
+      const streetLayer = L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        { attribution: 'OpenStreetMap' }
+      );
 
-      // Zoom control in bottom right
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      // Attach active tile layer
+      if (activeLayer === 'satellite') satLayer.addTo(map);
+      else if (activeLayer === 'bathymetry') oceanLayer.addTo(map);
+      else streetLayer.addTo(map);
 
       mapInstanceRef.current = map;
     } else {
       mapInstanceRef.current.setView([currentZone.lat, currentZone.lon], currentZone.zoom);
     }
-  }, [currentZone]);
+  }, [currentZone, activeLayer]);
 
-  // Render markers and layers
+  // Markers
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Layer group for dynamic items
-    const markersLayer = L.layerGroup();
+    const layerGroup = L.layerGroup();
 
-    // 1. Private User Spots
-    if (showPrivateSpots) {
-      userSpots.forEach((spot) => {
-        const iconHtml = `
-          <div class="custom-map-pin private-pin">
-            <span class="pin-symbol">🔒</span>
-            <span class="pin-label">${spot.name} (${spot.depthM}m)</span>
-          </div>
-        `;
-        const customIcon = L.divIcon({
-          html: iconHtml,
-          className: 'custom-div-icon',
-          iconSize: [36, 36],
-          iconAnchor: [18, 36],
-        });
-
-        const marker = L.marker([spot.lat, spot.lon], { icon: customIcon });
-        marker.bindPopup(`
-          <div class="map-popup-card">
-            <h4>🔒 ${spot.name}</h4>
-            <p><strong>Profundidad:</strong> ${spot.depthM} metros</p>
-            <p><strong>Privacidad:</strong> Exclusivo del usuario (privado)</p>
-            <p class="popup-note">${spot.notes || 'Sin notas'}</p>
-          </div>
-        `);
-        markersLayer.addLayer(marker);
+    // Hotspot markers
+    hotspots.forEach((hs) => {
+      const iconHtml = `
+        <div class="mockup-map-pin hotspot-pin">
+          <div class="hotspot-outer-ring"></div>
+          <div class="hotspot-center-dot"></div>
+          <span class="hotspot-badge-lbl">${hs.score}</span>
+        </div>
+      `;
+      const customIcon = L.divIcon({
+        html: iconHtml,
+        className: 'custom-leaflet-div-icon',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
       });
-    }
 
-    // 2. Hotspots for selected species
-    if (showHotspots) {
-      hotspots.forEach((hs) => {
-        const isMatched = hs.species === selectedSpecies.id;
-        const iconHtml = `
-          <div class="custom-map-pin hotspot-pin ${isMatched ? 'pulsing-hot' : 'dimmed'}">
-            <span class="pin-score">${hs.score}</span>
-            <span class="pin-label">${hs.name}</span>
-          </div>
-        `;
-        const customIcon = L.divIcon({
-          html: iconHtml,
-          className: 'custom-div-icon',
-          iconSize: [38, 38],
-          iconAnchor: [19, 38],
-        });
+      const marker = L.marker([hs.lat, hs.lon], { icon: customIcon });
+      marker.bindPopup(`
+        <div class="map-popup-card">
+          <h4>⚡ ${hs.name}</h4>
+          <div class="popup-score-tag">Fishing Score: ${hs.score}/100</div>
+          <p><strong>Especie:</strong> ${selectedSpecies.commonName}</p>
+          <p><strong>Fondo:</strong> ${hs.depth}m</p>
+        </div>
+      `);
+      layerGroup.addLayer(marker);
+    });
 
-        const marker = L.marker([hs.lat, hs.lon], { icon: customIcon });
-        marker.bindPopup(`
-          <div class="map-popup-card">
-            <h4>⚡ Hotspot Calculado</h4>
-            <div class="popup-score-tag">FISHIQ Score: ${hs.score}/100</div>
-            <p><strong>Lugar:</strong> ${hs.name}</p>
-            <p><strong>Estructura / Fondo:</strong> ${hs.depth}m (Batimetría GEBCO)</p>
-            <p><strong>Especie recomendada:</strong> ${selectedSpecies.commonName}</p>
-          </div>
-        `);
-        markersLayer.addLayer(marker);
+    // User Private Spots
+    userSpots.forEach((spot) => {
+      const iconHtml = `
+        <div class="mockup-map-pin private-pin">
+          <div class="private-center-dot">🔒</div>
+        </div>
+      `;
+      const customIcon = L.divIcon({
+        html: iconHtml,
+        className: 'custom-leaflet-div-icon',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
       });
-    }
 
-    // 3. Batimetría GEBCO simulated depth contours
-    if (showBathymetry) {
-      // Circles representing bathymetric drops and seamounts
-      const seamounts = [
-        { lat: 8.35, lon: -79.05, radius: 9000, label: 'Fosa Las Perlas (120m)' },
-        { lat: 7.35, lon: -80.05, radius: 12000, label: 'Plataforma Continental Azuero (200m)' },
-        { lat: 7.39, lon: -81.79, radius: 15000, label: 'Bajo Hannibal (Banco oceánico)' },
-      ];
+      const marker = L.marker([spot.lat, spot.lon], { icon: customIcon });
+      marker.bindPopup(`
+        <div class="map-popup-card">
+          <h4>🔒 ${spot.name}</h4>
+          <p><strong>Profundidad:</strong> ${spot.depthM} m</p>
+          <p><strong>Privacidad:</strong> Punto secreto de usuario</p>
+        </div>
+      `);
+      layerGroup.addLayer(marker);
+    });
 
-      seamounts.forEach((sm) => {
-        const circle = L.circle([sm.lat, sm.lon], {
-          radius: sm.radius,
-          color: '#00e5ff',
-          weight: 1.5,
-          opacity: 0.6,
-          fillColor: '#0077b6',
-          fillOpacity: 0.12,
-          dashArray: '4, 6',
-        });
-        circle.bindTooltip(`Curva GEBCO: ${sm.label}`, { sticky: true });
-        markersLayer.addLayer(circle);
-      });
-    }
-
-    markersLayer.addTo(map);
-
+    layerGroup.addTo(map);
     return () => {
-      map.removeLayer(markersLayer);
+      map.removeLayer(layerGroup);
     };
-  }, [showBathymetry, showHotspots, showPrivateSpots, userSpots, selectedSpecies]);
+  }, [selectedSpecies, userSpots]);
 
-  // Handle click on map to add spot
-  useEffect(() => {
-    const map = mapInstanceRef.current;
-    if (!map) return;
+  const handleZoom = (delta: number) => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setZoom(mapInstanceRef.current.getZoom() + delta);
+    }
+  };
 
-    const handleMapClick = (e: L.LeafletMouseEvent) => {
-      if (isAddingSpot) {
-        const newSpot: Spot = {
-          id: 'spot-' + Date.now(),
-          name: newSpotName || `Punto GPS (${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})`,
-          zoneId: currentZone.id,
-          lat: +e.latlng.lat.toFixed(4),
-          lon: +e.latlng.lng.toFixed(4),
-          depthM: parseInt(newSpotDepth) || 30,
-          isPrivate: true,
-          targetSpecies: [selectedSpecies.id],
-          notes: `Guardado en ${currentZone.name}`,
-          createdAt: new Date().toISOString(),
-        };
-        onAddSpot(newSpot);
-        setIsAddingSpot(false);
-        setNewSpotName('');
-      }
-    };
-
-    map.on('click', handleMapClick);
-    return () => {
-      map.off('click', handleMapClick);
-    };
-  }, [isAddingSpot, newSpotName, newSpotDepth, currentZone, selectedSpecies, onAddSpot]);
+  const handleRecenter = () => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView([currentZone.lat, currentZone.lon], currentZone.zoom);
+    }
+  };
 
   return (
-    <div className="screen-content map-screen-wrapper">
-      {/* Top Map Control Bar */}
-      <div className="map-floating-top-bar">
-        <div className="map-species-chip">
-          <span className="chip-label">Especie:</span>
+    <div className="screen-content mockup-map-screen">
+      {/* 1. MOCKUP TOP BAR & SEARCH (Phone 2 Style) */}
+      <div className="map-mockup-top-header">
+        <div className="map-title-row">
+          <h2 className="map-page-title">Mapa de pesca</h2>
           <select
-            value={selectedSpecies.id}
+            className="zone-header-dropdown"
+            value={currentZone.id}
             onChange={(e) => {
-              const sp = allSpecies.find((s) => s.id === e.target.value);
-              if (sp) onSelectSpecies(sp);
+              const z = allZones.find((item) => item.id === e.target.value);
+              if (z) onSelectZone(z);
             }}
-            className="map-species-select"
           >
-            {allSpecies.map((sp) => (
-              <option key={sp.id} value={sp.id}>
-                {sp.avatarEmoji} {sp.commonName}
+            {allZones.map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.name}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="map-layer-toggles">
+        {/* Search Input Bar */}
+        <div className="map-search-bar">
+          <Search size={16} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Buscar zona, especie o lugar..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="map-search-input"
+          />
+        </div>
+
+        {/* Layer Filter Pills */}
+        <div className="map-layer-pills-row">
           <button
-            className={`map-toggle-btn ${showBathymetry ? 'active' : ''}`}
-            onClick={() => setShowBathymetry(!showBathymetry)}
-            title="Capas de batimetría GEBCO 2026"
+            className={`map-pill-btn ${activeLayer === 'map' ? 'active' : ''}`}
+            onClick={() => setActiveLayer('map')}
           >
-            <Waves size={15} /> Batimetría
+            🗺️ Mapa
           </button>
           <button
-            className={`map-toggle-btn ${showHotspots ? 'active' : ''}`}
-            onClick={() => setShowHotspots(!showHotspots)}
-            title="Hotspots calculados por FISHIQ Score"
+            className={`map-pill-btn ${activeLayer === 'satellite' ? 'active' : ''}`}
+            onClick={() => setActiveLayer('satellite')}
           >
-            <Sparkles size={15} /> Hotspots
+            🛰️ Satélite
           </button>
           <button
-            className={`map-toggle-btn ${showPrivateSpots ? 'active' : ''}`}
-            onClick={() => setShowPrivateSpots(!showPrivateSpots)}
-            title="Spots privados guardados"
+            className={`map-pill-btn ${activeLayer === 'bathymetry' ? 'active' : ''}`}
+            onClick={() => setActiveLayer('bathymetry')}
           >
-            <Lock size={15} /> Mis Spots ({userSpots.length})
+            🌊 Batimetría
           </button>
         </div>
       </div>
 
-      {/* Map Container Element */}
-      <div id="fishiq-map-container" ref={mapContainerRef} className="leaflet-map-element"></div>
+      {/* 2. LEAFLET MAP ELEMENT */}
+      <div id="fishiq-map-container" ref={mapContainerRef} className="mockup-leaflet-canvas"></div>
 
-      {/* Floating Action Button for adding spot */}
-      <div className="map-floating-bottom-controls">
-        {!isAddingSpot ? (
-          <button className="add-spot-fab" onClick={() => setIsAddingSpot(true)}>
-            <Plus size={18} /> Marcar Spot Privado
-          </button>
-        ) : (
-          <div className="add-spot-prompt-card">
-            <div className="prompt-header">
-              <MapPin size={16} /> Toca en el mapa para fijar coordenadas
-            </div>
-            <div className="prompt-inputs">
-              <input
-                type="text"
-                placeholder="Nombre del spot (ej. Roca Secreta)"
-                value={newSpotName}
-                onChange={(e) => setNewSpotName(e.target.value)}
-                className="spot-input"
-              />
-              <input
-                type="number"
-                placeholder="Profundidad (m)"
-                value={newSpotDepth}
-                onChange={(e) => setNewSpotDepth(e.target.value)}
-                className="spot-depth-input"
-              />
-            </div>
-            <div className="prompt-actions">
-              <button className="cancel-spot-btn" onClick={() => setIsAddingSpot(false)}>
-                Cancelar
-              </button>
-              <span className="privacy-badge-note">
-                <Lock size={12} /> 100% Privado en tu cuenta
-              </span>
-            </div>
+      {/* 3. FLOATING RIGHT CONTROL BUTTONS */}
+      <div className="map-floating-right-tools">
+        <button className="tool-circle-btn" onClick={handleRecenter} title="Mi Ubicación GPS">
+          <Navigation size={18} />
+        </button>
+        <button
+          className="tool-circle-btn"
+          onClick={() => setActiveLayer(activeLayer === 'satellite' ? 'bathymetry' : 'satellite')}
+          title="Alternar Capas"
+        >
+          <Layers size={18} />
+        </button>
+        <button className="tool-circle-btn" onClick={() => setIsAddingSpot(true)} title="Guardar Spot">
+          <Heart size={18} />
+        </button>
+        <button className="tool-circle-btn zoom-btn" onClick={() => handleZoom(1)} title="Acercar">
+          <Plus size={18} />
+        </button>
+        <button className="tool-circle-btn zoom-btn" onClick={() => handleZoom(-1)} title="Alejar">
+          <Minus size={18} />
+        </button>
+      </div>
+
+      {/* 4. FLOATING BOTTOM CARD (Matching Phone 2 in Mockup) */}
+      <div className="map-floating-bottom-card" onClick={onNavigateToForecast}>
+        <div className="card-thumb-wrap">
+          <img
+            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=300&q=80"
+            alt={currentZone.name}
+            className="card-thumb-img"
+          />
+        </div>
+
+        <div className="card-info-col">
+          <div className="card-zone-title">
+            <span>{currentZone.name.split('&')[0]}</span>
+            <ChevronDown size={14} />
           </div>
-        )}
+          <div className="card-sp-subtitle">
+            <span>{selectedSpecies.avatarEmoji} {selectedSpecies.commonName}</span>
+          </div>
+          <div className="card-activity-meta">
+            <span className="text-emerald font-bold">Excelente actividad</span>
+            <span className="dot-sep">•</span>
+            <span>6:10 – 8:40 a.m.</span>
+          </div>
+        </div>
+
+        <div className="card-score-circle-green">
+          <span className="score-val">87</span>
+        </div>
       </div>
     </div>
   );

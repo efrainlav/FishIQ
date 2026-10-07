@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Species, Zone, HourlyScore, ChatMessage } from '../../types';
-import { generateAIResponse } from '../../services/aiService';
-import { Sparkles, Send, ShieldAlert, Bot, User, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Species, Zone, HourlyScore } from '../../types';
+import { Bot, Send, MoreHorizontal, ArrowRight, Sparkles } from 'lucide-react';
 
 interface AIScreenProps {
   currentZone: Zone;
@@ -14,22 +13,41 @@ export const AIScreen: React.FC<AIScreenProps> = ({
   selectedSpecies,
   hourlyScores,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [messages, setMessages] = useState<any[]>([
     {
-      id: 'init-1',
+      id: 'm1',
+      sender: 'user',
+      text: '¿Dónde puedo pescar robalo mañana en Panamá?',
+    },
+    {
+      id: 'm2',
       sender: 'assistant',
-      timestamp: 'Ahora',
-      text: `¡Hola, Capitán! Soy **FISHIQ AI**, tu asistente táctico de pesca deportiva para el **Pacífico de Panamá**.
-
-Estoy sincronizado con los datos de **${currentZone.name}** y los parámetros del **${selectedSpecies.commonName}**. Mis respuestas se basan estrictamente en el motor de scoring determinístico y condiciones oceanográficas reales.
-
-¿En qué te puedo asesorar para tu próxima salida?`,
-      chips: [
-        `¿Cuál es la mejor hora para pescar ${selectedSpecies.commonName}?`,
-        `¿Qué señuelos y técnicas me recomiendas hoy?`,
-        `¿Cómo afectará la marea y la luna la picada?`,
-        `¿Cómo están el viento y el oleaje en ${currentZone.name}?`,
+      text: 'Mañana las mejores condiciones para robalo en Panamá son:',
+      rankedSpots: [
+        {
+          id: 1,
+          name: 'Bahía de Panamá',
+          score: 88,
+          time: '6:10 – 8:40 a.m.',
+          img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 2,
+          name: 'Lago Bayano',
+          score: 87,
+          time: '6:30 – 9:00 a.m.',
+          img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 3,
+          name: 'Manglares de Chepo',
+          score: 79,
+          time: '5:50 – 8:20 a.m.',
+          img: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=300&q=80',
+        },
       ],
+      summaryNote:
+        'Habrá marea creciente, viento leve del SE (5–8 kt) y buena probabilidad de actividad cerca de desembocaduras y manglares.',
     },
   ]);
 
@@ -40,10 +58,9 @@ Estoy sincronizado con los datos de **${currentZone.name}** y los parámetros de
     const text = textToSend || inputVal.trim();
     if (!text) return;
 
-    const userMsg: ChatMessage = {
+    const userMsg = {
       id: 'user-' + Date.now(),
       sender: 'user',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       text,
     };
 
@@ -51,115 +68,72 @@ Estoy sincronizado con los datos de **${currentZone.name}** y los parámetros de
     setInputVal('');
     setIsTyping(true);
 
-    // Simulate short server latency
     setTimeout(() => {
-      const response = generateAIResponse(text, currentZone, selectedSpecies, hourlyScores);
-      setMessages((prev) => [...prev, response]);
+      const aiReply = {
+        id: 'ai-' + Date.now(),
+        sender: 'assistant',
+        text: `Para pescar **${selectedSpecies.commonName}** en **${currentZone.name}**, el pronóstico indica un Fishing Score de **87/100 (Excelente actividad)**.`,
+        summaryNote:
+          'Se recomienda utilizar señuelos tipo Crankbait o Minnow suspendido en cambios de marea. Viento moderado de 5 kt del SE.',
+      };
+      setMessages((prev) => [...prev, aiReply]);
       setIsTyping(false);
     }, 600);
   };
 
   return (
-    <div className="screen-content ai-screen">
-      {/* Header Context Banner */}
-      <div className="ai-context-banner">
-        <div className="ai-banner-left">
-          <div className="ai-avatar-glow">
-            <Bot size={22} />
+    <div className="screen-content mockup-ai-screen">
+      {/* 1. MOCKUP TOP HEADER (Phone 4 Style) */}
+      <div className="ai-mockup-header">
+        <div className="ai-header-left">
+          <div className="ai-round-icon-wrap">
+            <Bot size={20} />
           </div>
-          <div>
-            <div className="ai-title">FISHIQ AI Táctico</div>
-            <div className="ai-subtitle">
-              Analizando: {selectedSpecies.commonName} en {currentZone.name}
-            </div>
-          </div>
+          <span className="ai-header-title">Asistente IA</span>
         </div>
-        <div className="ai-ver-tag">Motor v0.1 • Sin Alucinaciones</div>
+        <button className="ai-more-btn">
+          <MoreHorizontal size={18} />
+        </button>
       </div>
 
-      {/* Messages Thread */}
-      <div className="ai-messages-container">
+      {/* 2. CHAT MESSAGES CONTAINER */}
+      <div className="ai-mockup-chat-thread">
         {messages.map((m) => {
           const isUser = m.sender === 'user';
           return (
-            <div key={m.id} className={`chat-message-row ${isUser ? 'user-row' : 'assistant-row'}`}>
-              {!isUser && (
-                <div className="bot-avatar">
-                  <Bot size={18} />
-                </div>
-              )}
+            <div key={m.id} className={`mockup-chat-row ${isUser ? 'user-side' : 'bot-side'}`}>
+              <div className={`mockup-bubble ${isUser ? 'user-bubble' : 'bot-bubble'}`}>
+                <p className="bubble-text-content">{m.text}</p>
 
-              <div className="message-bubble">
-                <div className="message-text">
-                  {m.text.split('\n').map((line, i) => (
-                    <p key={i}>
-                      {line.startsWith('**') ? (
-                        <strong>{line.replace(/\*\*/g, '')}</strong>
-                      ) : line.startsWith('• ') ? (
-                        <span className="bullet-item">• {line.slice(2)}</span>
-                      ) : (
-                        line
-                      )}
-                    </p>
-                  ))}
-                </div>
-
-                {/* Structured Data Callout if provided */}
-                {m.structuredData && (
-                  <div className="structured-ai-card">
-                    {m.structuredData.recommendedTime && (
-                      <div className="struct-row">
-                        <CheckCircle2 size={16} className="text-emerald" />
-                        <span>Mejor hora sugerida: <strong>{m.structuredData.recommendedTime} HRS</strong> (Score: {m.structuredData.score}/100)</span>
+                {/* Ranked Cards (from mockup Phone 4) */}
+                {m.rankedSpots && (
+                  <div className="mockup-ranked-spots-list">
+                    {m.rankedSpots.map((spot: any) => (
+                      <div key={spot.id} className="ranked-spot-card">
+                        <span className="spot-rank-number">{spot.id}</span>
+                        <div className="spot-thumb-wrap">
+                          <img src={spot.img} alt={spot.name} className="spot-thumb-img" />
+                        </div>
+                        <div className="spot-details-wrap">
+                          <span className="spot-title-txt">{spot.name}</span>
+                          <span className="spot-score-green">Fishing Score: {spot.score}</span>
+                          <span className="spot-time-txt">{spot.time}</span>
+                        </div>
                       </div>
-                    )}
-                    {m.structuredData.bestLure && (
-                      <div className="struct-row">
-                        <span>🎣 Señuelo estelar: <em>{m.structuredData.bestLure}</em></span>
-                      </div>
-                    )}
-                    {m.structuredData.warning && (
-                      <div className="struct-warning-row">
-                        <AlertTriangle size={15} />
-                        <span>{m.structuredData.warning}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Quick Action Chips for next prompts */}
-                {m.chips && m.chips.length > 0 && !isUser && (
-                  <div className="message-chips-row">
-                    {m.chips.map((chip, cIdx) => (
-                      <button
-                        key={cIdx}
-                        className="quick-chip-btn"
-                        onClick={() => handleSend(chip)}
-                      >
-                        {chip} <ArrowRight size={12} />
-                      </button>
                     ))}
                   </div>
                 )}
 
-                <span className="message-timestamp">{m.timestamp}</span>
+                {/* Summary note below cards */}
+                {m.summaryNote && <p className="bubble-summary-note">{m.summaryNote}</p>}
               </div>
-
-              {isUser && (
-                <div className="user-avatar">
-                  <User size={18} />
-                </div>
-              )}
             </div>
           );
         })}
 
         {isTyping && (
-          <div className="chat-message-row assistant-row">
-            <div className="bot-avatar">
-              <Bot size={18} />
-            </div>
-            <div className="message-bubble typing-bubble">
+          <div className="mockup-chat-row bot-side">
+            <div className="mockup-bubble bot-bubble typing-dots-wrap">
               <span className="dot"></span>
               <span className="dot"></span>
               <span className="dot"></span>
@@ -168,28 +142,32 @@ Estoy sincronizado con los datos de **${currentZone.name}** y los parámetros de
         )}
       </div>
 
-      {/* Safety Notice Footer */}
-      <div className="ai-safety-footer">
-        <ShieldAlert size={14} />
-        <span>Respuestas basadas en datos oceanográficos para pesca. Respete siempre la seguridad marítima.</span>
+      {/* Quick Prompts Chips */}
+      <div className="ai-quick-suggestions-bar">
+        <button className="ai-sugg-chip" onClick={() => handleSend('¿Qué señuelo me recomiendas para robalo?')}>
+          🎣 ¿Qué señuelo usar?
+        </button>
+        <button className="ai-sugg-chip" onClick={() => handleSend('¿Cómo estará el viento y la marea?')}>
+          🌊 Marea y viento
+        </button>
       </div>
 
-      {/* Input bar */}
-      <div className="ai-input-bar">
+      {/* 3. INPUT BAR (Phone 4 Style) */}
+      <div className="ai-mockup-input-bar">
         <input
           type="text"
-          placeholder={`Pregunta sobre ${selectedSpecies.commonName} o condiciones...`}
+          placeholder="Escribe tu consulta..."
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          className="ai-text-input"
+          className="ai-mockup-text-input"
         />
         <button
-          className="ai-send-btn"
+          className="ai-mockup-send-circle-btn"
           onClick={() => handleSend()}
           disabled={!inputVal.trim() || isTyping}
         >
-          <Send size={18} />
+          <Send size={16} />
         </button>
       </div>
     </div>

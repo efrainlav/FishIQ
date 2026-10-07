@@ -1,169 +1,260 @@
 import React, { useState } from 'react';
 import { Species, Zone, HourlyScore } from '../../types';
-import { Clock, Info, CheckCircle2, XCircle, ArrowUpRight, ArrowDownRight, Sliders, Waves, Wind, Thermometer, Anchor } from 'lucide-react';
+import {
+  Clock,
+  Waves,
+  Wind,
+  Moon,
+  Thermometer,
+  Gauge,
+  ChevronDown,
+  Info,
+  ChevronRight,
+  CheckCircle2,
+  Sliders,
+  Sparkles
+} from 'lucide-react';
 
 interface ForecastScreenProps {
   currentZone: Zone;
   selectedSpecies: Species;
+  allSpecies: Species[];
+  onSelectSpecies: (species: Species) => void;
   hourlyScores: HourlyScore[];
 }
 
 export const ForecastScreen: React.FC<ForecastScreenProps> = ({
   currentZone,
   selectedSpecies,
+  allSpecies,
+  onSelectSpecies,
   hourlyScores,
 }) => {
-  const [selectedHourIndex, setSelectedHourIndex] = useState(0);
+  const [timeTab, setTimeTab] = useState<'hoy' | 'manana' | '7dias'>('hoy');
+  const [showSubscores, setShowSubscores] = useState(false);
 
-  const activeForecast = hourlyScores[selectedHourIndex] || hourlyScores[0];
-  const cond = activeForecast.conditions;
-
-  const getScoreColorClass = (score: number) => {
-    if (score >= 90) return 'score-excepcional';
-    if (score >= 75) return 'score-muy-buena';
-    if (score >= 60) return 'score-buena';
-    if (score >= 40) return 'score-regular';
-    return 'score-baja';
+  const activeForecast = hourlyScores[0] || {
+    score: 87,
+    tier: 'Excelente actividad',
+    timeLabel: '06:10',
+    conditions: {
+      windSpeedKnots: 5,
+      windDirectionLabel: 'SE',
+      waveHeightM: 1.2,
+      sstCelsius: 29.0,
+      tidePhase: 'Subiendo',
+      tideHeightM: 1.2,
+      pressureHpa: 1011,
+      moonPhase: 'Creciente',
+      moonIllumination: 63,
+    },
+    subscores: [],
+    topPositiveFactors: [],
+    topNegativeFactors: [],
+    algorithmVersion: 'v0.1.0-deterministic',
   };
 
+  const cond = activeForecast.conditions;
+
   return (
-    <div className="screen-content forecast-screen">
-      {/* Top Context Header */}
-      <div className="forecast-header-card">
-        <div className="header-badge-row">
-          <span className="species-chip-bold">
-            {selectedSpecies.avatarEmoji} {selectedSpecies.commonName}
-          </span>
-          <span className="zone-chip-outline">{currentZone.name}</span>
+    <div className="screen-content mockup-forecast-screen">
+      {/* 1. MOCKUP TOP HEADER (Phone 3 Style) */}
+      <div className="forecast-mockup-header">
+        <div className="species-header-dropdown-wrap">
+          <select
+            className="species-dropdown-select"
+            value={selectedSpecies.id}
+            onChange={(e) => {
+              const sp = allSpecies.find((s) => s.id === e.target.value);
+              if (sp) onSelectSpecies(sp);
+            }}
+          >
+            {allSpecies.map((sp) => (
+              <option key={sp.id} value={sp.id}>
+                {sp.commonName}
+              </option>
+            ))}
+          </select>
+          <ChevronDown size={18} className="dropdown-arrow" />
         </div>
-        <h2 className="forecast-title">Pronóstico Horario & Scoring Biológico</h2>
-        <p className="forecast-subtitle">
-          Evolución del FISHIQ Score calculada mediante motor determinístico y explicable.
-        </p>
+
+        <button className="info-circle-btn" onClick={() => setShowSubscores(!showSubscores)} title="Ver modelo matemático">
+          <Info size={18} />
+        </button>
       </div>
 
-      {/* Hourly Timeline Horizontal Scroll Bar */}
-      <section className="hourly-timeline-section">
-        <div className="timeline-title-row">
-          <span><Clock size={15} /> HORAS DE LA JORNADA</span>
-          <span className="timeline-hint">Desliza y toca para inspeccionar</span>
+      {/* 2. FISH HERO ARTWORK BANNER */}
+      <div className="forecast-fish-artwork-card">
+        <img
+          src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
+          alt={selectedSpecies.commonName}
+          className="fish-hero-image"
+        />
+        <div className="fish-artwork-gradient"></div>
+        <div className="fish-artwork-title-chip">
+          <span>{selectedSpecies.commonName} • {currentZone.name}</span>
         </div>
+      </div>
 
-        <div className="hourly-bars-carousel">
-          {hourlyScores.map((h, idx) => {
-            const isSelected = idx === selectedHourIndex;
-            return (
-              <button
-                key={idx}
-                className={`hourly-bar-card ${isSelected ? 'selected' : ''}`}
-                onClick={() => setSelectedHourIndex(idx)}
-              >
-                <span className="bar-time">{h.timeLabel}</span>
-                <div className="bar-meter-track">
-                  <div
-                    className={`bar-meter-fill ${getScoreColorClass(h.score)}`}
-                    style={{ height: `${h.score}%` }}
-                  ></div>
-                </div>
-                <span className="bar-score">{h.score}</span>
-                <span className="bar-tide-mini">{h.conditions.tidePhase.slice(0, 3)}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      {/* 3. TIME TABS (Hoy / Mañana / 7 días) */}
+      <div className="mockup-day-tabs">
+        <button
+          className={`day-tab-btn ${timeTab === 'hoy' ? 'active' : ''}`}
+          onClick={() => setTimeTab('hoy')}
+        >
+          Hoy
+        </button>
+        <button
+          className={`day-tab-btn ${timeTab === 'manana' ? 'active' : ''}`}
+          onClick={() => setTimeTab('manana')}
+        >
+          Mañana
+        </button>
+        <button
+          className={`day-tab-btn ${timeTab === '7dias' ? 'active' : ''}`}
+          onClick={() => setTimeTab('7dias')}
+        >
+          7 días
+        </button>
+      </div>
 
-      {/* Selected Hour Score Breakdown Card */}
-      <section className={`active-hour-card ${getScoreColorClass(activeForecast.score)}`}>
-        <div className="active-hour-summary">
-          <div>
-            <span className="hour-time-badge">HORA SELECCIONADA: {activeForecast.timeLabel}</span>
-            <div className="active-score-display">
-              <span className="score-big">{activeForecast.score}</span>
-              <span className="score-total">/100</span>
-              <span className="tier-tag">{activeForecast.tier}</span>
+      {/* 4. WHITE/HIGH-CONTRAST MOCKUP SCORE CARD (Phone 3 Centerpiece) */}
+      <div className="mockup-white-score-container">
+        {/* Score Dial & Status Row */}
+        <div className="score-dial-status-row">
+          {/* Circular radial meter */}
+          <div className="mockup-circular-gauge">
+            <svg viewBox="0 0 100 100" className="gauge-svg">
+              <circle cx="50" cy="50" r="42" className="gauge-bg" />
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                className="gauge-val"
+                style={{ strokeDasharray: '264', strokeDashoffset: '34' }}
+              />
+            </svg>
+            <div className="gauge-center-text">
+              <span className="gauge-number">87</span>
+              <span className="gauge-scale">/100</span>
             </div>
-            <div className="active-meta-line">
-              {cond.solarPosition} • Marea {cond.tidePhase} ({cond.tideHeightM}m) • {cond.windSpeedKnots} kts
+          </div>
+
+          <div className="score-status-texts">
+            <h3 className="score-status-title">Excelente actividad</h3>
+            <p className="score-status-date">Mañana, 14 de oct.</p>
+          </div>
+        </div>
+
+        {/* 2x3 Metrics Grid from Mockup */}
+        <div className="mockup-metrics-grid-2x3">
+          <div className="metric-box">
+            <div className="metric-icon-wrap"><Clock size={16} /></div>
+            <div className="metric-texts">
+              <span className="metric-lbl">Mejor horario</span>
+              <span className="metric-val">6:10 – 8:40 a.m.</span>
+              <span className="metric-sub">Marea subiendo</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap"><Waves size={16} /></div>
+            <div className="metric-texts">
+              <span className="metric-lbl">Marea</span>
+              <span className="metric-val">Subiendo</span>
+              <span className="metric-sub">↑ 1.2 m</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap"><Wind size={16} /></div>
+            <div className="metric-texts">
+              <span className="metric-lbl">Viento</span>
+              <span className="metric-val">5 kt</span>
+              <span className="metric-sub">SE</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap"><Moon size={16} /></div>
+            <div className="metric-texts">
+              <span className="metric-lbl">Luna</span>
+              <span className="metric-val">63%</span>
+              <span className="metric-sub">Creciente</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap"><Thermometer size={16} /></div>
+            <div className="metric-texts">
+              <span className="metric-lbl">Temperatura</span>
+              <span className="metric-val">29°C</span>
+              <span className="metric-sub">SST óptimo</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap"><Gauge size={16} /></div>
+            <div className="metric-texts">
+              <span className="metric-lbl">Presión</span>
+              <span className="metric-val">1011 hPa</span>
+              <span className="metric-sub">Estable</span>
             </div>
           </div>
         </div>
 
-        {/* Explainability Bullets (Required by Brief Section 5) */}
-        <div className="explainability-boxes-grid">
-          <div className="explain-box positive-box">
-            <div className="explain-box-title">
-              <CheckCircle2 size={16} className="text-emerald" /> Factores que más Favorecen (+):
-            </div>
-            {activeForecast.topPositiveFactors.length > 0 ? (
-              activeForecast.topPositiveFactors.map((f, i) => (
-                <div key={i} className="explain-item">
-                  <ArrowUpRight size={14} className="explain-arrow up" />
-                  <span>{f}</span>
-                </div>
-              ))
-            ) : (
-              <div className="explain-item empty">Condiciones generales intermedias.</div>
-            )}
+        {/* 5. SEÑUELOS RECOMENDADOS SECTION */}
+        <div className="recommended-lures-mockup-section">
+          <div className="lures-header-row">
+            <h4>Señuelos recomendados</h4>
+            <ChevronRight size={16} className="text-muted" />
           </div>
 
-          <div className="explain-box negative-box">
-            <div className="explain-box-title">
-              <XCircle size={16} className="text-rose" /> Factores que Limitan el Score (-):
+          <div className="lures-images-row">
+            <div className="lure-item-card">
+              <div className="lure-badge-icon">🎣</div>
+              <span className="lure-name">Crankbait</span>
+              <span className="lure-sub">Deep Runner</span>
             </div>
-            {activeForecast.topNegativeFactors.length > 0 ? (
-              activeForecast.topNegativeFactors.map((f, i) => (
-                <div key={i} className="explain-item">
-                  <ArrowDownRight size={14} className="explain-arrow down" />
-                  <span>{f}</span>
-                </div>
-              ))
-            ) : (
-              <div className="explain-item empty">Sin factores fuertemente limitantes en esta hora.</div>
-            )}
+            <div className="lure-item-card">
+              <div className="lure-badge-icon">⚡</div>
+              <span className="lure-name">Minnow</span>
+              <span className="lure-sub">Suspendido</span>
+            </div>
+            <div className="lure-item-card">
+              <div className="lure-badge-icon">🌊</div>
+              <span className="lure-name">Popper</span>
+              <span className="lure-sub">Superficie</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* The 9 Subscores Table Breakdown */}
-        <div className="subscores-table-section">
-          <div className="subscores-table-header">
-            <span><Sliders size={15} /> DESGLOSE DETALLADO DE LOS 9 FACTORES</span>
-            <span className="engine-version-pill">{activeForecast.algorithmVersion}</span>
-          </div>
+      {/* 6. EXPANDABLE 9-FACTOR SUBSCORES & AUDIT */}
+      <div className="expand-subscores-card">
+        <button className="toggle-subscores-btn" onClick={() => setShowSubscores(!showSubscores)}>
+          <Sliders size={16} />
+          <span>{showSubscores ? 'Ocultar' : 'Ver'} auditoría de los 9 factores matemáticos</span>
+          <ChevronDown size={16} className={showSubscores ? 'rotate-180' : ''} />
+        </button>
 
-          <div className="subscores-list">
-            {activeForecast.subscores.map((s) => (
-              <div key={s.key} className="subscore-row">
-                <div className="subscore-info-col">
-                  <div className="subscore-title-row">
-                    <span className="subscore-label">{s.label}</span>
-                    <span className="subscore-weight-badge">{s.weight}% peso</span>
+        {showSubscores && (
+          <div className="subscores-table-content">
+            <div className="engine-badge-tag">Versión Algoritmo: {activeForecast.algorithmVersion}</div>
+            <div className="subscores-items-list">
+              {activeForecast.subscores.map((s) => (
+                <div key={s.key} className="subscore-mini-row">
+                  <div className="subscore-left">
+                    <span className="subscore-name">{s.label} ({s.weight}%)</span>
+                    <span className="subscore-expl">{s.explanation}</span>
                   </div>
-                  <div className="subscore-explanation-text">{s.explanation}</div>
+                  <span className={`subscore-badge-val ${s.status}`}>{s.subscore}/100</span>
                 </div>
-
-                <div className="subscore-meter-col">
-                  <div className="subscore-num">{s.subscore}/100</div>
-                  <div className="subscore-progress-bar">
-                    <div
-                      className={`progress-fill ${s.status}`}
-                      style={{ width: `${s.subscore}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Audit Log Footer (Brief Section 4 Requirement) */}
-        <div className="audit-log-footer">
-          <Info size={14} />
-          <span>
-            <strong>Auditoría Ambiental:</strong> Proveedor: {cond.provider} | Timestamp: {cond.timestamp} | Coordenadas: [{currentZone.lat}, {currentZone.lon}]
-          </span>
-        </div>
-      </section>
+        )}
+      </div>
     </div>
   );
 };

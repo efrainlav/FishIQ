@@ -153,6 +153,7 @@ export const App: React.FC = () => {
             selectedSpecies={selectedSpecies}
             allSpecies={speciesList}
             onSelectSpecies={setSelectedSpecies}
+            onNavigateToForecast={() => setActiveTab('forecast')}
           />
         )}
 
@@ -160,6 +161,8 @@ export const App: React.FC = () => {
           <ForecastScreen
             currentZone={currentZone}
             selectedSpecies={selectedSpecies}
+            allSpecies={speciesList}
+            onSelectSpecies={setSelectedSpecies}
             hourlyScores={hourlyScores}
           />
         )}

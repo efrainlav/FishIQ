@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Map, Activity, Fish, BookOpen, Sparkles, Sliders } from 'lucide-react';
+import { Home, Map, Activity, BookOpen, Bot, MoreHorizontal } from 'lucide-react';
 
 export type TabId = 'home' | 'map' | 'forecast' | 'species' | 'logbook' | 'ai' | 'admin';
 
@@ -13,11 +13,10 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onSelectTab, 
   const tabs: { id: TabId; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'home', label: 'Inicio', icon: <Home size={20} /> },
     { id: 'map', label: 'Mapa', icon: <Map size={20} /> },
-    { id: 'forecast', label: 'Score', icon: <Activity size={20} /> },
-    { id: 'species', label: 'Especies', icon: <Fish size={20} /> },
+    { id: 'forecast', label: 'Pronóstico', icon: <Activity size={20} /> },
     { id: 'logbook', label: 'Diario', icon: <BookOpen size={20} />, badge: catchCount },
-    { id: 'ai', label: 'FISHIQ AI', icon: <Sparkles size={20} /> },
-    { id: 'admin', label: 'Calibrar', icon: <Sliders size={20} /> },
+    { id: 'ai', label: 'IA', icon: <Bot size={20} /> },
+    { id: 'admin', label: 'Más', icon: <MoreHorizontal size={20} /> },
   ];
 
   return (

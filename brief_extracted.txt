@@ -1,0 +1,233 @@
+FISHIQ
+SMART FISHING LATAM
+Brief técnico para cotización y desarrollo del MVP — v1.0
+Mercado piloto: Panamá  |  Preparado para: Richard Rojas  |  Octubre 2026
+OBJETIVOConstruir una web-app/PWA móvil que combine datos ambientales, conocimiento por especie y registros reales de capturas para producir un FISHIQ Score (0–100), explicar por qué una ventana es favorable y aprender progresivamente de los resultados de los pescadores.
+Principio del MVP: predicción de pesca, NO navegación marítima.
+1. Alcance del MVP
+El desarrollador debe cotizar el producto base siguiente. Todo lo marcado como Fase 2 queda fuera de la primera cotización.
+Módulo
+MVP obligatorio
+Fase 2 / no incluir ahora
+Cuenta y perfil
+Registro/login, idioma ES, perfil básico, modalidad de pesca.
+Social login avanzado, múltiples perfiles, clubes.
+Mapa inteligente
+Mapa Panamá, GPS, capas de spots privados, batimetría base, zonas/waypoints.
+Navegación turn-by-turn, cartas náuticas certificadas, offline completo.
+Condiciones
+Viento, lluvia, presión, oleaje, swell, SST, corrientes, marea/modelo y fase lunar.
+Radar premium, satélite avanzado, boyas propias.
+FISHIQ Score
+Score 0–100 por especie/zona/hora + explicación de factores.
+ML autoentrenado y modelos individuales por usuario.
+Especies
+8 especies marinas iniciales + fichas, técnica, profundidad y condiciones.
+Catálogo LATAM completo y reconocimiento automático.
+IA
+Chat contextual: '¿qué pesco mañana?', usando datos actuales + reglas de especie.
+Agente multimodal completo, voz, planificación automática de viaje.
+Diario de capturas
+Foto, especie, peso/talla, GPS, hora, señuelo/técnica, notas; captura automática de condiciones.
+Competencias, rankings, comunidad pública.
+Administración
+Panel simple para especies, reglas, zonas, usuarios y revisión de capturas.
+CRM, marketplace, torneos, publicidad.
+2. Mercado piloto y especies
+Geografía inicial: Pacífico de Panamá, con zonas piloto en Golfo/Bahía de Panamá y costa accesible; arquitectura preparada para añadir Caribe, Gatún, Bayano y otros países sin reescribir el núcleo.
+Especies MVP recomendadas: róbalo, jurel, pargo, corvina, dorado/mahi-mahi, atún, wahoo y sábalo/tarpon.
+Cada especie debe tener parámetros editables desde el panel administrativo: profundidad, temperatura, marea, corriente, viento, hora, temporada y técnicas.
+Los lagos Gatún y Bayano pueden entrar como piloto 1B cuando se definan fuentes de nivel/meteorología y especies de agua dulce.
+3. Flujo principal del usuario
+1) Usuario abre FISHIQ → selecciona zona o usa ubicación.
+2) Selecciona especie objetivo y fecha/hora (ahora, mañana o próximos días).
+3) Backend consulta/cachéa condiciones ambientales.
+4) Motor determinístico calcula FISHIQ Score por bloques horarios.
+5) App muestra score, mejor ventana, mapa y explicación de los 3–5 factores principales.
+6) Asistente IA responde preguntas usando únicamente datos estructurados + base de conocimiento.
+7) Después de pescar, usuario registra captura; el sistema adjunta automáticamente las condiciones del momento/lugar.
+8) Datos de captura alimentan analítica; el aprendizaje estadístico avanzado se activa en fase posterior.
+4. Fuentes de datos propuestas
+El desarrollador debe diseñar una capa de proveedores (provider abstraction) para poder cambiar de API sin rehacer la aplicación.
+Dato
+Proveedor inicial
+Uso
+Observación técnica
+Mapa base
+Mapbox GL JS
+Mapa interactivo y capas propias
+Hasta 50k cargas web/mes gratis según tarifa publicada; validar términos al contratar.
+Batimetría
+GEBCO 2026
+Profundidad/estructura para scoring y visualización
+Dominio público; atribución requerida. No usar como navegación.
+Mar
+Open-Meteo Marine
+Oleaje, swell, SST, corriente, nivel del mar modelado
+Global; mareas/corrientes costeras pueden tener precisión limitada.
+Tiempo
+Open-Meteo Weather u otro proveedor intercambiable
+Viento, presión, precipitación, nubosidad
+Cachear por cuadrícula/tiempo para reducir llamadas.
+Mareas
+Proveedor dedicado a validar para Panamá
+Altura, pleamar/bajamar y fase de marea
+No basar el producto final solo en modelo global costero; comparar contra fuentes/estaciones locales.
+Luna/sol
+Cálculo astronómico local
+Fase lunar, salida/puesta, amanecer/atardecer
+Puede calcularse server-side sin IA.
+IA
+OpenAI API
+Explicación y conversación contextual
+La IA no calcula el score; recibe score + variables + reglas.
+Requisito: todas las respuestas ambientales deben guardar proveedor, timestamp, coordenadas, unidad y versión/modelo cuando esté disponible, para auditoría y calibración.
+5. FISHIQ Score v0.1
+Primera versión: motor determinístico y explicable. Cada variable se normaliza 0–100 según la especie y luego se pondera. Los pesos deben ser editables sin desplegar código.
+Score = Σ (pesoᵢ × subscoreᵢ)  →  resultado 0–100
+Factor
+Peso inicial
+Qué evalúa
+Marea / movimiento de agua
+20%
+Estado, tendencia y cercanía a cambio de marea.
+Hora / luz
+15%
+Amanecer, atardecer, noche y ventana preferida por especie.
+Corriente
+15%
+Velocidad/dirección vs rango favorable.
+Temperatura del agua
+15%
+SST vs rango objetivo de la especie.
+Viento
+10%
+Velocidad/dirección y efecto operativo/biológico.
+Presión / tendencia
+10%
+Presión y cambio reciente.
+Oleaje / swell
+5%
+Condición de mar; penalización de extremos.
+Luna
+5%
+Fase/iluminación como factor secundario inicial.
+Temporada
+5%
+Mes/estacionalidad regional.
+Clasificación inicial: 0–39 Baja | 40–59 Regular | 60–74 Buena | 75–89 Muy buena | 90–100 Excepcional. Estos umbrales y pesos son hipótesis de producto: deben calibrarse con capitanes y datos reales, no venderse como certeza científica.
+6. Arquitectura funcional sugerida
+Frontend: PWA responsive (React/Next.js o equivalente), optimizada para iPhone/Android.
+Backend/API: Node.js/TypeScript o Python/FastAPI; decisión del equipo, siempre con API documentada.
+Base de datos: PostgreSQL + PostGIS para usuarios, spots, capturas, polígonos, especies y datos geográficos.
+Cache/colas: Redis o equivalente para forecasts, jobs y control de costos.
+Storage: objeto compatible S3 para fotos de capturas.
+IA: endpoint server-side; nunca exponer API keys en cliente. La IA recibe JSON estructurado y base de conocimiento versionada.
+Analytics: eventos de uso, consultas de score, zonas consultadas y conversión a registro de captura.
+Privacidad: spots privados por defecto; coordenadas exactas no deben hacerse públicas sin consentimiento explícito.
+7. Pantallas a diseñar y desarrollar
+Pantalla
+Contenido mínimo
+01 Onboarding
+Propuesta de valor, permisos de ubicación, modalidad de pesca.
+02 Home
+Zona actual, condiciones, mejor ventana, especies destacadas.
+03 Mapa
+Mapa + capas + selector de especie/fecha + hotspots calculados.
+04 Pronóstico
+Score horario 24–72h y factores que lo explican.
+05 Especie
+Ficha, rango de profundidad, temporada, técnica y señuelos.
+06 FISHIQ AI
+Chat contextual con botones rápidos: hoy, mañana, especie, zona.
+07 Registrar captura
+Foto + campos + GPS + condiciones automáticas.
+08 Diario
+Historial, filtros y mapa privado de capturas.
+09 Perfil
+Preferencias, unidades, privacidad y plan.
+10 Admin web
+CRUD especies/reglas/zonas; revisión de capturas y métricas.
+8. Modelo de datos mínimo
+Entidades: User, Species, SpeciesRuleSet, Zone, Spot, ForecastSnapshot, ScoreCalculation, Catch, Lure/Technique, AIConversation, SubscriptionPlan y ProviderLog.
+Catch debe almacenar condiciones ambientales como snapshot histórico; no recalcularlas después.
+ScoreCalculation debe guardar inputs, pesos, subscores, versión del algoritmo y resultado.
+SpeciesRuleSet debe ser versionado para poder comparar cambios del algoritmo.
+9. IA: comportamiento requerido
+La IA NO inventa condiciones ni spots. Debe responder con los datos suministrados por backend.
+Debe poder explicar: por qué el score sube/baja, mejor ventana, técnica sugerida y riesgos/limitaciones del dato.
+Si falta un dato crítico, debe decirlo y reducir confianza; nunca completar con valores ficticios.
+Respuesta en español desde el MVP; arquitectura preparada para portugués e inglés.
+El sistema debe distinguir recomendación de pesca de navegación/seguridad marítima.
+10. Criterios de aceptación del MVP
+Un usuario puede registrarse, seleccionar zona/especie/fecha y obtener un score horario.
+El score es reproducible: mismos inputs + misma versión = mismo resultado.
+Cada score muestra los factores que más lo favorecen y perjudican.
+Mapa carga correctamente y puede mostrar batimetría/zonas/spots privados.
+Usuario puede registrar captura con foto y ubicación; se guarda snapshot ambiental.
+IA puede responder usando el score y datos reales sin calcularlos por su cuenta.
+Panel admin permite modificar pesos/reglas de especie sin cambiar código.
+Logs permiten identificar proveedor y momento de cada dato externo.
+Responsive en Safari iPhone y Chrome Android.
+Privacidad: spots/capturas privadas por defecto.
+11. Entregables que debe incluir la cotización
+UX/UI final en Figma para las 10 pantallas.
+Repositorio de código propiedad del cliente y documentación de instalación.
+Frontend PWA + backend + base de datos + panel admin.
+Integraciones de mapas, clima/mar, batimetría e IA.
+Motor FISHIQ Score configurable y versionado.
+Ambientes desarrollo/staging/producción y despliegue.
+Pruebas básicas, monitoreo de errores y analítica.
+Documentación API y esquema de base de datos.
+30–60 días de soporte post-lanzamiento, cotizado por separado.
+Detalle de costos mensuales externos y límites de cada proveedor.
+12. Solicitud de cotización por fases
+Fase
+Resultado
+Cotizar separado
+A. Discovery + UX
+Arquitectura, wireframes, Figma, definición APIs y reglas.
+Precio fijo + semanas.
+B. MVP técnico
+PWA funcional, backend, score, mapa, diario, IA y admin.
+Precio fijo + semanas.
+C. Beta Panamá
+QA, instrumentación, ajustes con 20–50 testers.
+Bolsa/retainer.
+D. Producción
+Hardening, pagos/suscripción, publicación PWA y operación.
+Precio + mensualidad.
+13. Preguntas obligatorias al desarrollador
+¿Qué stack propone y por qué? ¿Qué partes quedan atadas a un proveedor?
+¿Cómo implementará PostGIS y capas geoespaciales?
+¿Cómo cacheará forecasts para controlar costo y latencia?
+¿Cómo versionará el algoritmo FISHIQ Score?
+¿Cómo manejará privacidad de spots y coordenadas?
+¿Cómo sustituiremos una API de mareas/clima sin rehacer el producto?
+¿Quién posee código, diseño, base de datos y cuentas cloud al terminar?
+¿Cuál es el costo mensual estimado con 1k, 10k y 50k usuarios activos?
+¿Qué incluye QA, seguridad, backups, monitoreo y soporte?
+¿Qué queda explícitamente fuera del MVP?
+14. Presupuesto objetivo para comparar propuestas
+Usar estos rangos solo como marco de negociación; pedir cotización desglosada por horas/fase y costos recurrentes. El costo real dependerá del equipo, diseño y nivel de pulido.
+Escenario
+Rango orientativo
+Comentario
+Prototipo navegable
+US$2k–5k
+Figma + validación, sin backend productivo.
+MVP lean
+US$12k–25k
+PWA, APIs, score, diario e IA con alcance controlado.
+MVP robusto
+US$25k–50k+
+Mayor QA, admin, seguridad, analítica y geoespacial avanzado.
+Recomendación: no contratar desarrollo completo hasta cerrar Fase A (Discovery + UX) y validar técnicamente mareas/datos costeros de Panamá.
+15. Fuentes técnicas verificadas (octubre 2026)
+Open-Meteo Marine Weather API — https://open-meteo.com/en/docs/marine-weather-api
+GEBCO 2026 Grid — https://www.gebco.net/data-products/gridded-bathymetry-data
+GEBCO Terms of Use — https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use
+Mapbox Pricing — https://www.mapbox.com/pricing
+OpenAI API Pricing — https://developers.openai.com/api/docs/pricing
+Google Maps Platform Pricing — https://developers.google.com/maps/billing-and-pricing/pricing
+FISHIQ — Documento de trabajo confidencial / concepto de producto

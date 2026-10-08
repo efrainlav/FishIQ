@@ -118,15 +118,17 @@ export const App: React.FC = () => {
 
   return (
     <div className="fishiq-app-root">
-      {/* Top Header */}
-      <Header
-        currentZone={currentZone}
-        onSelectZone={setCurrentZone}
-        allZones={zones}
-        units={units}
-        onToggleUnits={() => setUnits((u) => (u === 'Metric' ? 'Imperial' : 'Metric'))}
-        onOpenOnboarding={() => setIsOnboardingOpen(true)}
-      />
+      {/* Top Header (visible on inner tabs, clean on home) */}
+      {activeTab !== 'home' && (
+        <Header
+          currentZone={currentZone}
+          onSelectZone={setCurrentZone}
+          allZones={zones}
+          units={units}
+          onToggleUnits={() => setUnits((u) => (u === 'Metric' ? 'Imperial' : 'Metric'))}
+          onOpenOnboarding={() => setIsOnboardingOpen(true)}
+        />
+      )}
 
       {/* Main Screen Body */}
       <main className="main-viewport-container">
@@ -204,12 +206,14 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <Navigation
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        catchCount={catches.length}
-      />
+      {/* Mobile Bottom Navigation (cleanly omitted on Inicio to match the immersive mobile splash) */}
+      {activeTab !== 'home' && (
+        <Navigation
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          catchCount={catches.length}
+        />
+      )}
 
       {/* Modals */}
       <LogCatchModal

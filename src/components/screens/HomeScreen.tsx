@@ -1,21 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Species, Zone, HourlyScore, CatchRecord } from '../../types';
-import {
-  Cloud,
-  Waves,
-  Moon,
-  MapPin,
-  Fish,
-  BarChart3,
-  Clock,
-  Sparkles,
-  ChevronRight,
-  ShieldCheck,
-  CheckCircle2,
-  Wind,
-  Thermometer,
-  Gauge
-} from 'lucide-react';
+import { AuthModal } from './AuthModal';
+import { Signal, Wifi, BatteryMedium } from 'lucide-react';
 
 interface HomeScreenProps {
   currentZone: Zone;
@@ -26,222 +12,118 @@ interface HomeScreenProps {
   onOpenLogCatch: () => void;
   onNavigateToTab: (tab: 'map' | 'forecast' | 'logbook' | 'ai' | 'admin') => void;
   recentCatches: CatchRecord[];
+  onLoginSuccess?: (name: string) => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
-  currentZone,
-  selectedSpecies,
-  onSelectSpecies,
-  allSpecies,
-  hourlyScores,
-  onOpenLogCatch,
   onNavigateToTab,
-  recentCatches,
+  onLoginSuccess,
 }) => {
-  const currentForecast = hourlyScores[0] || {
-    score: 87,
-    tier: 'Excelente actividad',
-    timeLabel: '06:10',
-    conditions: {
-      windSpeedKnots: 5,
-      windDirectionLabel: 'SE',
-      waveHeightM: 1.2,
-      sstCelsius: 29.0,
-      tidePhase: 'Subiendo',
-      tideHeightM: 1.2,
-      pressureHpa: 1011,
-      moonPhase: 'Creciente',
-      moonIllumination: 63,
-    },
-    topPositiveFactors: [],
-    topNegativeFactors: [],
+  const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'login' | 'register' }>({
+    isOpen: false,
+    mode: 'login',
+  });
+
+  const handleAuthSuccess = (userName: string) => {
+    if (onLoginSuccess) onLoginSuccess(userName);
+    onNavigateToTab('forecast');
   };
 
-  const cond = currentForecast.conditions;
-  const bestWindow = [...hourlyScores].sort((a, b) => b.score - a.score)[0] || currentForecast;
-
   return (
-    <div className="screen-content home-screen">
-      {/* 1. MOCKUP HERO HEADER (Phone 1 Style) */}
-      <section className="mockup-splash-hero-card">
-        <div className="splash-logo-container">
-          <div className="splash-fish-logo-icon">
-            <svg viewBox="0 0 100 50" className="brand-svg-fish" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 25C25 8 60 5 85 15C95 20 90 28 80 32C65 38 35 42 10 25Z" fill="url(#fishGrad)" />
-              <path d="M75 18C82 12 92 10 98 12C95 18 90 22 84 22Z" fill="#00e5ff" />
-              <path d="M78 28C85 34 92 36 98 34C94 30 88 26 82 26Z" fill="#0077b6" />
-              <circle cx="28" cy="22" r="3" fill="#ffffff" />
-              <defs>
-                <linearGradient id="fishGrad" x1="10" y1="25" x2="85" y2="25" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#00e5ff" />
-                  <stop offset="1" stopColor="#0077b6" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <h1 className="mockup-brand-title">FISHIQ</h1>
-          <div className="mockup-brand-sub">SMART FISHING LATAM</div>
-          <p className="mockup-brand-slogan">Mejores decisiones. Más capturas.</p>
+    <div className="clean-immersive-home-screen">
+      {/* 1. FULL BACKGROUND IMAGE: Complete Leaping Snook & Ocean Splash */}
+      <div className="clean-hero-bg-container">
+        <img
+          src="/images/splash_fish.jpg"
+          alt="Robalo saltando completo con salpicadura de agua marina"
+          className="clean-hero-fish-img"
+        />
+        {/* Soft atmospheric gradient for top logo readability & bottom button contrast */}
+        <div className="clean-hero-top-vignette" />
+        <div className="clean-hero-bottom-vignette" />
+      </div>
+
+      {/* 2. TOP MOBILE STATUS BAR (Matching iPhone mockup: 9:41, Cellular, Wifi, Battery) */}
+      <div className="clean-mobile-status-bar">
+        <span className="status-clock">9:41</span>
+        <div className="status-icons-strip">
+          <Signal size={13} className="status-icon" />
+          <Wifi size={13} className="status-icon" />
+          <BatteryMedium size={16} className="status-icon" />
+        </div>
+      </div>
+
+      {/* 3. CLEAN FLOATING LOGO (Clean Vector Fish + FISHIQ + SMART FISHING LATAM) */}
+      <div className="clean-floating-brand-center">
+        <div className="clean-fish-emblem-wrap">
+          <svg viewBox="0 0 120 48" className="clean-floating-fish-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="cyanBrandGrad" x1="16" y1="24" x2="105" y2="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="65%" stopColor="#00d2ff" />
+                <stop offset="100%" stopColor="#0284c7" />
+              </linearGradient>
+            </defs>
+            {/* Upper crest wave / fin */}
+            <path
+              d="M38 10C54 3 82 7 98 17C89 19 79 17 67 16C53 15 44 18 38 10Z"
+              fill="#38bdf8"
+            />
+            {/* Streamlined main fish body */}
+            <path
+              d="M16 25C29 13 65 10 94 19C105 23 102 31 92 34C77 40 40 44 16 25Z"
+              fill="url(#cyanBrandGrad)"
+            />
+            {/* Top tail fin */}
+            <path d="M87 18C95 12 106 10 113 12C109 19 103 23 96 23Z" fill="#00f2fe" />
+            {/* Bottom tail fin */}
+            <path d="M90 30C98 36 106 38 112 36C108 31 101 27 95 27Z" fill="#0284c7" />
+            {/* Eye */}
+            <circle cx="34" cy="22" r="3" fill="#ffffff" />
+            <circle cx="35" cy="22" r="1.5" fill="#04162c" />
+          </svg>
         </div>
 
-        {/* Feature Icons Strip from Reference Mockup */}
-        <div className="feature-icons-strip">
-          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
-            <div className="feature-icon-circle"><Cloud size={16} /></div>
-            <span>Clima</span>
-          </div>
-          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
-            <div className="feature-icon-circle"><Waves size={16} /></div>
-            <span>Mareas</span>
-          </div>
-          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
-            <div className="feature-icon-circle"><Moon size={16} /></div>
-            <span>Luna</span>
-          </div>
-          <div className="feature-item" onClick={() => onNavigateToTab('map')}>
-            <div className="feature-icon-circle"><MapPin size={16} /></div>
-            <span>Mapas</span>
-          </div>
-          <div className="feature-item" onClick={() => onNavigateToTab('forecast')}>
-            <div className="feature-icon-circle"><Fish size={16} /></div>
-            <span>Especies</span>
-          </div>
-          <div className="feature-item" onClick={() => onNavigateToTab('ai')}>
-            <div className="feature-icon-circle"><BarChart3 size={16} /></div>
-            <span>IA y datos</span>
-          </div>
-        </div>
+        <h1 className="clean-brand-logotype">
+          FISH<span className="logotype-iq-cyan">IQ</span>
+        </h1>
+        <div className="clean-brand-strapline">SMART FISHING LATAM</div>
+      </div>
 
-        {/* Hero Leaping Fish Graphic */}
-        <div className="splash-fish-artwork">
-          <img
-            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
-            alt="Robalo jumping out of water"
-            className="splash-hero-img"
-          />
-          <div className="splash-img-overlay-glow"></div>
-        </div>
+      {/* 4. CLEAN BOTTOM ACTIONS (2 Clean Buttons: Iniciar sesión & Registrarse + Explorar) */}
+      <div className="clean-hero-cta-section">
+        <button
+          className="clean-btn-solid-blue"
+          onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
+        >
+          Iniciar sesión
+        </button>
 
-        {/* Action Buttons from Mockup */}
-        <div className="splash-cta-buttons">
-          <button className="mockup-btn-primary" onClick={() => onNavigateToTab('forecast')}>
-            Comenzar
-          </button>
-          <button className="mockup-btn-secondary" onClick={() => onNavigateToTab('map')}>
-            Explorar Mapa Inteligente
-          </button>
-        </div>
-      </section>
+        <button
+          className="clean-btn-outline-blue"
+          onClick={() => setAuthModal({ isOpen: true, mode: 'register' })}
+        >
+          Registrarse
+        </button>
 
-      {/* 2. LIVE DASHBOARD QUICK SUMMARY */}
-      <section className="live-snapshot-card">
-        <div className="section-header-compact">
-          <span className="section-title-tag">CONDICIONES EN {currentZone.name.toUpperCase()}</span>
-          <span className="score-badge-green">Score {currentForecast.score}/100</span>
-        </div>
+        <button
+          className="clean-btn-explore-link"
+          onClick={() => onNavigateToTab('forecast')}
+        >
+          Explorar sin cuenta
+        </button>
 
-        <div className="conditions-grid-2x3">
-          <div className="cond-mini-tile">
-            <Clock size={16} className="text-cyan" />
-            <div className="tile-texts">
-              <span className="tile-lbl">Mejor horario</span>
-              <span className="tile-val">6:10 – 8:40 a.m.</span>
-            </div>
-          </div>
+        <div className="iphone-home-indicator-bar" />
+      </div>
 
-          <div className="cond-mini-tile">
-            <Waves size={16} className="text-cyan" />
-            <div className="tile-texts">
-              <span className="tile-lbl">Marea ({cond.tidePhase})</span>
-              <span className="tile-val">↑ {cond.tideHeightM} m</span>
-            </div>
-          </div>
-
-          <div className="cond-mini-tile">
-            <Wind size={16} className="text-cyan" />
-            <div className="tile-texts">
-              <span className="tile-lbl">Viento</span>
-              <span className="tile-val">{cond.windSpeedKnots} kt {cond.windDirectionLabel}</span>
-            </div>
-          </div>
-
-          <div className="cond-mini-tile">
-            <Moon size={16} className="text-cyan" />
-            <div className="tile-texts">
-              <span className="tile-lbl">Luna</span>
-              <span className="tile-val">{cond.moonIllumination}% {cond.moonPhase}</span>
-            </div>
-          </div>
-
-          <div className="cond-mini-tile">
-            <Thermometer size={16} className="text-cyan" />
-            <div className="tile-texts">
-              <span className="tile-lbl">Temperatura</span>
-              <span className="tile-val">{cond.sstCelsius}°C</span>
-            </div>
-          </div>
-
-          <div className="cond-mini-tile">
-            <Gauge size={16} className="text-cyan" />
-            <div className="tile-texts">
-              <span className="tile-lbl">Presión</span>
-              <span className="tile-val">{cond.pressureHpa} hPa</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. SPECIES SELECTOR ROW */}
-      <section className="species-picker-section">
-        <div className="section-header-compact">
-          <span className="section-title-tag">SELECCIONAR ESPECIE</span>
-          <span className="station-provider-tag">8 especies de Panamá</span>
-        </div>
-
-        <div className="species-scroll-row">
-          {allSpecies.map((sp) => {
-            const isSelected = sp.id === selectedSpecies.id;
-            return (
-              <button
-                key={sp.id}
-                className={`species-pill-btn ${isSelected ? 'active' : ''}`}
-                onClick={() => onSelectSpecies(sp)}
-              >
-                <span className="sp-emoji">{sp.avatarEmoji}</span>
-                <span className="sp-name">{sp.commonName}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 4. RECENT CATCHES PREVIEW */}
-      <section className="recent-activity-section">
-        <div className="section-header-compact">
-          <span className="section-title-tag">ÚLTIMAS CAPTURAS DE LA COMUNIDAD</span>
-          <button className="text-link-btn" onClick={() => onNavigateToTab('logbook')}>
-            Ver diario ({recentCatches.length}) <ChevronRight size={14} />
-          </button>
-        </div>
-
-        <div className="recent-catches-preview-row">
-          {recentCatches.slice(0, 2).map((c) => (
-            <div key={c.id} className="mini-catch-card" onClick={() => onNavigateToTab('logbook')}>
-              <div className="mini-catch-img-wrap">
-                <img src={c.photoUrl} alt={c.speciesName} className="mini-catch-img" />
-                <span className="mini-catch-weight">{c.weightLb} lb</span>
-              </div>
-              <div className="mini-catch-info">
-                <div className="mini-catch-sp">{c.speciesName}</div>
-                <div className="mini-catch-lure">{c.lureUsed} • {c.lengthCm} cm</div>
-                <div className="mini-catch-snap">
-                  Score {c.environmentalSnapshot.scoreCalculated} • {c.zoneName}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* 5. AUTH MODAL (Login / Register sheet) */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        initialMode={authModal.mode}
+        onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };
+

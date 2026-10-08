@@ -45,24 +45,39 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   font-family: var(--font-main);
   background-color: var(--bg-deep);
   color: var(--text-primary);
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
 }
 
 /* App Root Wrapper (Optimized for Mobile iPhone & Android viewports) */
 .fishiq-app-root {
   width: 100%;
-  max-width: 500px;
-  height: 100vh;
-  max-height: 1000px;
+  max-width: 440px;
+  height: 100%;
+  max-height: 920px;
   background-color: var(--bg-marine);
   display: flex;
   flex-direction: column;
@@ -71,17 +86,20 @@ body {
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.05);
 }
 
-@media (max-width: 500px) {
+@media (max-width: 480px) {
   .fishiq-app-root {
+    width: 100vw;
+    height: 100vh;
     max-height: 100vh;
     border-radius: 0;
+    border: none;
   }
 }
 
-@media (min-width: 501px) {
+@media (min-width: 481px) {
   .fishiq-app-root {
-    border-radius: 36px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
     height: 94vh;
   }
 }
@@ -252,6 +270,10 @@ body {
 /* 2. MAIN VIEWPORT & SCROLL AREA */
 .main-viewport-container {
   flex: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -3135,11 +3157,11 @@ input:checked + .slider.round:before {
 
 /* 1. HERO & SPLASH CLEAN IMMERSIVE (PHONE 1 STYLE) */
 .clean-immersive-home-screen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -3162,7 +3184,7 @@ input:checked + .slider.round:before {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 38%;
+  object-position: center top;
   display: block;
 }
 
@@ -3184,6 +3206,14 @@ input:checked + .slider.round:before {
   height: 240px;
   background: linear-gradient(0deg, rgba(2, 12, 26, 0.92) 0%, rgba(2, 16, 36, 0.5) 65%, transparent 100%);
   pointer-events: none;
+}
+
+.clean-hero-top-group {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .clean-mobile-status-bar {
@@ -3216,7 +3246,7 @@ input:checked + .slider.round:before {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-top: 8px;
+  margin-top: 14px;
 }
 
 .clean-fish-emblem-wrap {

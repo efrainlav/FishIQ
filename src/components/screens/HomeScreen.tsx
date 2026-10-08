@@ -43,51 +43,52 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className="clean-hero-bottom-vignette" />
       </div>
 
-      {/* 2. TOP MOBILE STATUS BAR (Matching iPhone mockup: 9:41, Cellular, Wifi, Battery) */}
-      <div className="clean-mobile-status-bar">
-        <span className="status-clock">9:41</span>
-        <div className="status-icons-strip">
-          <Signal size={13} className="status-icon" />
-          <Wifi size={13} className="status-icon" />
-          <BatteryMedium size={16} className="status-icon" />
-        </div>
-      </div>
-
-      {/* 3. CLEAN FLOATING LOGO (Clean Vector Fish + FISHIQ + SMART FISHING LATAM) */}
-      <div className="clean-floating-brand-center">
-        <div className="clean-fish-emblem-wrap">
-          <svg viewBox="0 0 120 48" className="clean-floating-fish-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="cyanBrandGrad" x1="16" y1="24" x2="105" y2="24" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#22d3ee" />
-                <stop offset="65%" stopColor="#00d2ff" />
-                <stop offset="100%" stopColor="#0284c7" />
-              </linearGradient>
-            </defs>
-            {/* Upper crest wave / fin */}
-            <path
-              d="M38 10C54 3 82 7 98 17C89 19 79 17 67 16C53 15 44 18 38 10Z"
-              fill="#38bdf8"
-            />
-            {/* Streamlined main fish body */}
-            <path
-              d="M16 25C29 13 65 10 94 19C105 23 102 31 92 34C77 40 40 44 16 25Z"
-              fill="url(#cyanBrandGrad)"
-            />
-            {/* Top tail fin */}
-            <path d="M87 18C95 12 106 10 113 12C109 19 103 23 96 23Z" fill="#00f2fe" />
-            {/* Bottom tail fin */}
-            <path d="M90 30C98 36 106 38 112 36C108 31 101 27 95 27Z" fill="#0284c7" />
-            {/* Eye */}
-            <circle cx="34" cy="22" r="3" fill="#ffffff" />
-            <circle cx="35" cy="22" r="1.5" fill="#04162c" />
-          </svg>
+      {/* 2. TOP GROUP: MOBILE STATUS BAR + CLEAN FLOATING LOGO */}
+      <div className="clean-hero-top-group">
+        <div className="clean-mobile-status-bar">
+          <span className="status-clock">9:41</span>
+          <div className="status-icons-strip">
+            <Signal size={13} className="status-icon" />
+            <Wifi size={13} className="status-icon" />
+            <BatteryMedium size={16} className="status-icon" />
+          </div>
         </div>
 
-        <h1 className="clean-brand-logotype">
-          FISH<span className="logotype-iq-cyan">IQ</span>
-        </h1>
-        <div className="clean-brand-strapline">SMART FISHING LATAM</div>
+        <div className="clean-floating-brand-center">
+          <div className="clean-fish-emblem-wrap">
+            <svg viewBox="0 0 120 48" className="clean-floating-fish-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="cyanBrandGrad" x1="16" y1="24" x2="105" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#22d3ee" />
+                  <stop offset="65%" stopColor="#00d2ff" />
+                  <stop offset="100%" stopColor="#0284c7" />
+                </linearGradient>
+              </defs>
+              {/* Upper crest wave / fin */}
+              <path
+                d="M38 10C54 3 82 7 98 17C89 19 79 17 67 16C53 15 44 18 38 10Z"
+                fill="#38bdf8"
+              />
+              {/* Streamlined main fish body */}
+              <path
+                d="M16 25C29 13 65 10 94 19C105 23 102 31 92 34C77 40 40 44 16 25Z"
+                fill="url(#cyanBrandGrad)"
+              />
+              {/* Top tail fin */}
+              <path d="M87 18C95 12 106 10 113 12C109 19 103 23 96 23Z" fill="#00f2fe" />
+              {/* Bottom tail fin */}
+              <path d="M90 30C98 36 106 38 112 36C108 31 101 27 95 27Z" fill="#0284c7" />
+              {/* Eye */}
+              <circle cx="34" cy="22" r="3" fill="#ffffff" />
+              <circle cx="35" cy="22" r="1.5" fill="#04162c" />
+            </svg>
+          </div>
+
+          <h1 className="clean-brand-logotype">
+            FISH<span className="logotype-iq-cyan">IQ</span>
+          </h1>
+          <div className="clean-brand-strapline">SMART FISHING LATAM</div>
+        </div>
       </div>
 
       {/* 4. CLEAN BOTTOM ACTIONS (2 Clean Buttons: Iniciar sesión & Registrarse + Explorar) */}

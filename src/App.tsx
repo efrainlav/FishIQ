@@ -55,9 +55,7 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [units, setUnits] = useState<'Metric' | 'Imperial'>('Metric');
   const [isLogCatchOpen, setIsLogCatchOpen] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(() => {
-    return !localStorage.getItem('fishiq_onboarding_completed');
-  });
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Save to localStorage when state changes
   useEffect(() => {

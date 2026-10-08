@@ -116,8 +116,8 @@ export const App: React.FC = () => {
 
   return (
     <div className="fishiq-app-root">
-      {/* Top Header (visible on inner tabs, clean on home) */}
-      {activeTab !== 'home' && (
+      {/* Top Header (visible on inner tabs, clean on home and map to match full-bleed mockups) */}
+      {activeTab !== 'home' && activeTab !== 'map' && (
         <Header
           currentZone={currentZone}
           onSelectZone={setCurrentZone}
@@ -154,6 +154,7 @@ export const App: React.FC = () => {
             allSpecies={speciesList}
             onSelectSpecies={setSelectedSpecies}
             onNavigateToForecast={() => setActiveTab('forecast')}
+            onNavigateBack={() => setActiveTab('forecast')}
           />
         )}
 

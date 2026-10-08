@@ -1,0 +1,19 @@
+{
+  "name": "FISHIQ — Smart Fishing Latam",
+  "short_name": "FISHIQ",
+  "description": "Predicción deportiva y biológica de pesca en el Pacífico de Panamá.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060d17",
+  "theme_color": "#060d17",
+  "orientation": "portrait-primary",
+  "categories": ["sports", "navigation", "weather"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
